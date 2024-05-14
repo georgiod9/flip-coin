@@ -5,7 +5,12 @@ import Spacer from "../Spacer";
 import coinIcon from "../../assets/coin.png";
 import "./flip.css";
 
-function ControlInterface({ callToaster, toggleRefresh, refreshControl }) {
+function ControlInterface({
+  backendActor,
+  callToaster,
+  toggleRefresh,
+  refreshControl,
+}) {
   const [lastFlipId, setLastFlipId] = useState(0);
   const [flipHistory, setFlipHistory] = useState([]);
   console.log(`stared`);
@@ -96,6 +101,11 @@ function ControlInterface({ callToaster, toggleRefresh, refreshControl }) {
   };
 
   const handleSubmitFlip = async () => {
+    // Validate backend service instance
+    if (!backendActor) {
+      console.log(`Backend instance not defined.`);
+      return;
+    }
     if (selectedSide === -1) {
       console.log(`Please select side.`);
       return;
@@ -111,7 +121,7 @@ function ControlInterface({ callToaster, toggleRefresh, refreshControl }) {
     console.log(`Flipping coin...`);
     let bidAmountIcp = bidAmount * 10 ** 8;
     const bidSide = selectedSide === 1 ? true : false;
-    const result = await FlipCoin_backend.submitFlip(bidSide, bidAmountIcp);
+    const result = await backendActor.submitFlip(bidSide, bidAmountIcp);
     console.log(`result: `, result);
 
     toggleRefresh();
