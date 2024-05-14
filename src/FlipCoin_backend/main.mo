@@ -229,19 +229,22 @@ actor FlipCoin {
     // Calculate target subaccount
     let source_account = Account.accountIdentifier(Principal.fromActor(FlipCoin), Account.principalToSubaccount(msg.caller));
 
+    let source_account_nat_array = Blob.toArray(source_account);
     // Check ledger for value
     let balance = await IcpLedger.account_balance({
-      account = Blob.toArray(source_account);
+      account = source_account_nat_array;
     });
 
-    let destination_deposit_identifier = Account.accountIdentifier(Principal.fromActor(FlipCoin), Account.defaultSubaccount());
+    let subAcc = Blob.toArray(Account.principalToSubaccount(msg.caller));
 
+    let destination_deposit_identifier = Account.accountIdentifier(Principal.fromActor(FlipCoin), Account.defaultSubaccount());
+    let destination = Blob.toArray(destination_deposit_identifier);
     // Transfer to default subaccount
     let icp_receipt = if (Nat64.toNat(balance.e8s) > icp_fee) {
       await IcpLedger.transfer({
         memo : Nat64 = 0;
-        from_subaccount = ?Blob.toArray(Account.principalToSubaccount(msg.caller));
-        to = Blob.toArray(destination_deposit_identifier);
+        from_subaccount = ?subAcc;
+        to = destination;
         amount = { e8s = balance.e8s - Nat64.fromNat(icp_fee) };
         fee = { e8s = Nat64.fromNat(icp_fee) };
         created_at_time = ?{
@@ -440,6 +443,7 @@ actor FlipCoin {
       # debug_show (args.toSubaccount)
     );
 
+    let destination_address = Blob.toArray(Principal.toLedgerAccount(args.toPrincipal, args.toSubaccount));
     let transferArgs : IcpLedger.TransferArgs = {
       // can be used to distinguish between transactions
       memo = 0;
@@ -450,7 +454,7 @@ actor FlipCoin {
       // we are transferring from the canisters default subaccount, therefore we don't need to specify it
       from_subaccount = null;
       // we take the principal and subaccount from the arguments and convert them into an account identifier
-      to = Blob.toArray(Principal.toLedgerAccount(args.toPrincipal, args.toSubaccount));
+      to = destination_address;
       // a timestamp indicating when the transaction was created by the caller; if it is not specified by the caller then this is set to the current ICP time
       created_at_time = null;
     };
