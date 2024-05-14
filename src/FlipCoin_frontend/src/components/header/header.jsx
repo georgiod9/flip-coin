@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Col, Container, Spinner } from "react-bootstrap";
+import { Button, Col, Container, Spinner } from "react-bootstrap";
 import { FlipCoin_backend } from "declarations/FlipCoin_backend";
 
-function Header({ refreshControl }) {
+function Header({ refreshControl, setShowTopUpModal }) {
   const [triggerRefresh, setTriggerRefresh] = refreshControl;
   const [lastFlipId, setLastFlipId] = useState(0);
   const [flipHistory, setFlipHistory] = useState([]);
@@ -65,9 +65,13 @@ function Header({ refreshControl }) {
     height: "100%",
     padding: "5px 5px",
   };
+  useEffect(() => {
+    console.log(`test2`);
+  }, []);
 
   useEffect(() => {
     const fromBackendFetch_RecentFlips = async () => {
+      console.log(`logging...`);
       // Get last flip id
       FlipCoin_backend.getLastFlipId().then((id) => {
         setLastFlipId(id);
@@ -75,6 +79,8 @@ function Header({ refreshControl }) {
 
         // Get history with paging
         FlipCoin_backend.getFlipHistory(start, id).then((flips) => {
+          console.log(`logging2...`);
+
           console.log(`flip history: `, flips);
           setFlipHistory(flips);
         });
@@ -136,6 +142,9 @@ function Header({ refreshControl }) {
 
       <Col xs={1} md={"auto"}>
         <p style={containerTextStyle}>Connect Wallet</p>
+        <p onClick={() => setShowTopUpModal(true)} style={containerTextStyle}>
+          Top Up
+        </p>
       </Col>
     </Container>
   );
