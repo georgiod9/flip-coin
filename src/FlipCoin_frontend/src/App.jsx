@@ -1,13 +1,20 @@
 import { useEffect, useState } from "react";
 import { FlipCoin_backend, createActor } from "declarations/FlipCoin_backend";
+// import { icp_ledger_canister } from "declarations/icp_ledger_canister";
 import Header from "./components/header/header";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ControlInterface from "./components/control/ControlInterface";
 import Spacer from "./components/Spacer";
 import Toaster from "./components/Toast/Toaster";
 import { AuthClient } from "@dfinity/auth-client";
-import { HttpAgent } from "@dfinity/agent";
+import { HttpAgent, Actor } from "@dfinity/agent";
 import { TopUpComponent } from "./components/TopUp/TopUpComponent";
+import {
+  getFlipCoinCredits,
+  getWalletOnChainBalance,
+} from "./scripts/getBalance";
+import { getLedgerCanisterPrincipal } from "./scripts/getPrincipal";
+import { setupIdentifiedIcpLedger } from "./scripts/icpLedger";
 
 let actor = FlipCoin_backend;
 
@@ -15,7 +22,13 @@ function App() {
   const [triggerRefresh, setTriggerRefresh] = useState(false);
   const [walletIdentity, setWalletIdentity] = useState(null);
   const [identifiedActor, setIdentifiedActor] = useState(null);
+  const [identifiedIcpLedgerActor, setIdentifiedIcpLedgerActor] =
+    useState(null);
   const [showTopUpModal, setShowTopUpModal] = useState(false);
+  const [walletBalance, setWalletBalance] = useState(0);
+  const [accountCredit, setAccountCredit] = useState(0);
+
+  const [ledgerCanisterPrincipal, setLedgerCanisterPrincipal] = useState(null);
 
   //Toast vars
   const [toastProps, setToastProps] = useState({
@@ -86,15 +99,38 @@ function App() {
         const identity = authClient.getIdentity();
         console.log(`logged in with identity:`, identity);
 
+        const principal = identity.getPrincipal();
+
+        console.log(`logged in with principal:`, principal.toText());
+
+        const balance = await getWalletOnChainBalance(principal);
+        setWalletBalance(balance);
+
+        const ledgerPrincipal = await getLedgerCanisterPrincipal();
+        console.log(`ledger prinicapl id`, ledgerPrincipal.toText());
+
+        setLedgerCanisterPrincipal(ledgerPrincipal.toText());
+
         // Using the identity obtained from the auth client, create an agent to interact with the IC.
-        const agent = new HttpAgent({ identity });
+        const agent = new HttpAgent({
+          identity,
+          host: `http://localhost:4943`,
+        });
         // Using the interface description of our webapp, create an actor that we use to call the service methods.
         actor = createActor(process.env.CANISTER_ID_FLIPCOIN_BACKEND, {
           agent,
         });
 
+        const icpLedgerActor = setupIdentifiedIcpLedger(agent);
+        setIdentifiedIcpLedgerActor(icpLedgerActor);
+        console.log(`identified icp acor`, icpLedgerActor);
+
         setWalletIdentity(identity);
         setIdentifiedActor(actor);
+
+        const credits = await getFlipCoinCredits(actor);
+
+        setAccountCredit(credits);
 
         console.log(`Created new actor from identified agent.`);
       } catch (error) {
@@ -110,7 +146,14 @@ function App() {
   return (
     <div>
       {showTopUpModal && (
-        <TopUpComponent showControl={[showTopUpModal, setShowTopUpModal]} />
+        <TopUpComponent
+          showControl={[showTopUpModal, setShowTopUpModal]}
+          accountBalance={walletBalance}
+          accountCredit={accountCredit}
+          ledgerPrincipal={ledgerCanisterPrincipal}
+          identifiedActor={identifiedActor}
+          identifiedIcpActor={identifiedIcpLedgerActor}
+        />
       )}
       <Header
         refreshControl={[triggerRefresh, setTriggerRefresh]}
