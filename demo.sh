@@ -32,8 +32,6 @@ echo "===========SETUP DONE========="
 
 dfx deploy FlipCoin_backend
 
-TOKENS_TRANSFER_ACCOUNT_ID="$(dfx ledger account-id --of-canister FlipCoin_backend)"
-TOKENS_TRANSFER_ACCOUNT_ID_BYTES="$(python3 -c 'print("vec{" + ";".join([str(b) for b in bytes.fromhex("'$TOKENS_TRANSFER_ACCOUNT_ID'")]) + "}")')"
 
 TARGET_DEPOSIT_ADDRESS_BYTES="$(python3 -c 'print("vec{" + ";".join([str(b) for b in bytes.fromhex("'$TARGET_DEPOSIT_ADDRESS'")]) + "}")')"
 
@@ -41,7 +39,19 @@ TARGET_DEPOSIT_ADDRESS_BYTES="$(python3 -c 'print("vec{" + ";".join([str(b) for 
 TARGET_DEPOSIT_ADDRESS_BYTES="vec{97;21;174;75;165;97;168;108;209;103;193;253;108;15;55;98;57;71;133;33;127;235;203;249;203;7;155;242;78;7;125;172}"
 
 
+TOKENS_TRANSFER_ACCOUNT_ID="$(dfx ledger account-id --of-canister FlipCoin_backend)"
+TOKENS_TRANSFER_ACCOUNT_ID_BYTES="$(python3 -c 'print("vec{" + ";".join([str(b) for b in bytes.fromhex("'$TOKENS_TRANSFER_ACCOUNT_ID'")]) + "}")')"
+
+# Transfer tokens from default to flipcoin contract
 dfx canister --identity default call icp_ledger_canister transfer "(record { to = ${TOKENS_TRANSFER_ACCOUNT_ID_BYTES}; memo = 1; amount = record { e8s = 2_000_000_000 }; fee = record { e8s = 10_000 }; })"
+
+# transfer to user dev 1 id: 10000 principal: dx6vz-vhqey-xdj7o-k4mbs-5x76l-7gst4-aee6m-rfalm-bqams-gjkd3-fae
+DEV2_ACCOUNT_PRINCIPAL="dx6vz-vhqey-xdj7o-k4mbs-5x76l-7gst4-aee6m-rfalm-bqams-gjkd3-fae"
+DEV1_ACCOUNT_PRINCIPAL="akwhr-ay6mj-hkrh2-xfnsg-47kh3-dsnfy-jbe3x-x2iuq-4frjj-76csk-6ae"
+
+
+dfx canister call FlipCoin_backend transfer "(record { amount = record { e8s = 100_000_000 }; toPrincipal = principal \"${DEV1_ACCOUNT_PRINCIPAL}\"})"
+
 
 dfx canister call FlipCoin_backend transfer "(record { amount = record { e8s = 100_000_000 }; toPrincipal = principal \"$(dfx identity --identity default get-principal)\"})"
 
