@@ -8,6 +8,7 @@ import { depositTokens } from "../../scripts/topUp";
 
 export function TopUpComponent({
   showControl,
+  refreshControl,
   accountBalance,
   accountCredit,
   identifiedActor,
@@ -15,27 +16,16 @@ export function TopUpComponent({
 }) {
   const [topUpAmount, setTopUpAmount] = useState(0);
   const [show, setShow] = showControl;
+  const [refresh, toggleRefresh] = refreshControl;
 
   const topUp = async (e) => {
     e.preventDefault();
 
     const amountInE8s = icpToE8s(parseFloat(topUpAmount)); // Convert ICP to e8s
-    const TARGET_DEPOSIT_ADDRESS = "be2us-64aaa-aaaaa-qaabq-cai";
-    const targetPrincipal = Principal.fromText("be2us-64aaa-aaaaa-qaabq-cai");
-
-    const TARGET_DEPOSIT_ADDRESS_BYTES = targetPrincipal.toUint8Array();
-    console.log(
-      `TARGET_DEPOSIT_ADDRESS_BYTES add`,
-      TARGET_DEPOSIT_ADDRESS_BYTES
-    );
 
     try {
       // Retrieve deposit address
       const userDepositAddress = await getUserDepositAddress(identifiedActor);
-      console.log(`trying to transfer: `, amountInE8s);
-      console.log(`from acocunt: `);
-
-      console.log(`userdeposit add`, userDepositAddress);
 
       const transferArgs = {
         to: userDepositAddress,
@@ -47,11 +37,15 @@ export function TopUpComponent({
       };
 
       const result = await identifiedIcpActor.transfer(transferArgs);
-      console.log("Transfer result:", result);
+      console.log("Transfer token result:", result);
 
-      console.log(`triggerin deposit....`);
       await triggerDepositTokens();
-      console.log(`done deposit call....`);
+      console.log(`Deposit complete.`);
+
+      setShow(false);
+
+      // Refresh components
+      toggleRefresh();
     } catch (error) {
       console.error("Error during transfer:", error);
     }
