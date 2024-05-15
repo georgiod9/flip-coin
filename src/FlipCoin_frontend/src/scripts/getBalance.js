@@ -21,6 +21,22 @@ export const getWalletOnChainBalance = async (principal) => {
     }
 };
 
+export const getFlipCoinCanisterBalance = async (principal) => {
+    try {
+        // const principal = Principal.fromText(principalText);
+        const accountIdentifier = await icp_ledger_canister.account_identifier({ owner: Principal.fromText(principal), subaccount: [] })
+        console.log(`account identifier: `, accountIdentifier)
+        const balance = await icp_ledger_canister.account_balance({ account: accountIdentifier })
+
+
+        console.log("Canister Balance:", balance);
+        return balance.e8s;
+    } catch (error) {
+        console.error(`getBalance: Error getting wallet balance.`, error);
+        return null;
+    }
+};
+
 
 export const getFlipCoinCredits = async (identifiedActor) => {
     try {

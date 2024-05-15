@@ -10,6 +10,7 @@ import { AuthClient } from "@dfinity/auth-client";
 import { HttpAgent, Actor } from "@dfinity/agent";
 import { TopUpComponent } from "./components/TopUp/TopUpComponent";
 import {
+  getFlipCoinCanisterBalance,
   getFlipCoinCredits,
   getWalletOnChainBalance,
 } from "./scripts/getBalance";
@@ -17,6 +18,7 @@ import { getLedgerCanisterPrincipal } from "./scripts/getPrincipal";
 import { setupIdentifiedIcpLedger } from "./scripts/icpLedger";
 
 let actor = FlipCoin_backend;
+let backendPrincipal = process.env.CANISTER_ID_FLIPCOIN_BACKEND;
 
 function App() {
   const [triggerRefresh, setTriggerRefresh] = useState(false);
@@ -27,7 +29,9 @@ function App() {
   const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [walletBalance, setWalletBalance] = useState(0);
   const [accountCredit, setAccountCredit] = useState(0);
+  const [isIdentified, setIsIdentified] = useState(false);
 
+  const [flipCoinCanisterBalance, setFlipCoinCanisterBalance] = useState(0);
   const [ledgerCanisterPrincipal, setLedgerCanisterPrincipal] = useState(null);
 
   //Toast vars
@@ -99,17 +103,17 @@ function App() {
         const identity = authClient.getIdentity();
         console.log(`logged in with identity:`, identity);
 
-        const principal = identity.getPrincipal();
+        // const principal = identity.getPrincipal();
 
-        console.log(`logged in with principal:`, principal.toText());
+        // console.log(`logged in with principal:`, principal.toText());
 
-        const balance = await getWalletOnChainBalance(principal);
-        setWalletBalance(balance);
+        // const balance = await getWalletOnChainBalance(principal);
+        // setWalletBalance(balance);
 
-        const ledgerPrincipal = await getLedgerCanisterPrincipal();
-        console.log(`ledger prinicapl id`, ledgerPrincipal.toText());
+        // const ledgerPrincipal = await getLedgerCanisterPrincipal();
+        // console.log(`ledger prinicapl id`, ledgerPrincipal.toText());
 
-        setLedgerCanisterPrincipal(ledgerPrincipal.toText());
+        // setLedgerCanisterPrincipal(ledgerPrincipal.toText());
 
         // Using the identity obtained from the auth client, create an agent to interact with the IC.
         const agent = new HttpAgent({
@@ -121,16 +125,21 @@ function App() {
           agent,
         });
 
-        const icpLedgerActor = setupIdentifiedIcpLedger(agent);
-        setIdentifiedIcpLedgerActor(icpLedgerActor);
-        console.log(`identified icp acor`, icpLedgerActor);
+        const ledgerPrincipal = await getLedgerCanisterPrincipal();
+        console.log(`ledger prinicapl id`, ledgerPrincipal.toText());
 
+        setLedgerCanisterPrincipal(ledgerPrincipal.toText());
+
+        const icpLedgerActor = setupIdentifiedIcpLedger(agent);
+
+        setIdentifiedIcpLedgerActor(icpLedgerActor);
         setWalletIdentity(identity);
+        setIsIdentified(true);
         setIdentifiedActor(actor);
 
-        const credits = await getFlipCoinCredits(actor);
+        // const credits = await getFlipCoinCredits(actor);
 
-        setAccountCredit(credits);
+        // setAccountCredit(credits);
 
         console.log(`Created new actor from identified agent.`);
       } catch (error) {
@@ -143,10 +152,33 @@ function App() {
     connectWallet();
   }, []);
 
+  useEffect(() => {
+    const getBalances = async () => {
+      if (walletIdentity && identifiedActor && ledgerCanisterPrincipal) {
+        const principal = walletIdentity.getPrincipal();
+        console.log(`logged in with principal:`, principal.toText());
+
+        const balance = await getWalletOnChainBalance(principal);
+        setWalletBalance(balance);
+
+        const contractBalance = await getFlipCoinCanisterBalance(
+          backendPrincipal
+        );
+        console.log(`contract bal: `, contractBalance);
+        setFlipCoinCanisterBalance(contractBalance);
+
+        const credits = await getFlipCoinCredits(identifiedActor);
+        setAccountCredit(credits);
+      }
+    };
+    getBalances();
+  }, [triggerRefresh, walletIdentity, identifiedActor]);
+
   return (
     <div>
       {showTopUpModal && (
         <TopUpComponent
+          refreshControl={[triggerRefresh, toggleRefresh]}
           showControl={[showTopUpModal, setShowTopUpModal]}
           accountBalance={walletBalance}
           accountCredit={accountCredit}
@@ -156,8 +188,12 @@ function App() {
         />
       )}
       <Header
-        refreshControl={[triggerRefresh, setTriggerRefresh]}
+        refreshControl={[triggerRefresh, toggleRefresh]}
         setShowTopUpModal={setShowTopUpModal}
+        accountBalance={walletBalance}
+        accountCredit={accountCredit}
+        isWalletConnected={isIdentified}
+        flipCoinCanisterBalance={flipCoinCanisterBalance}
       />
       {showToaster && (
         <Toaster
