@@ -1,9 +1,18 @@
 import { useEffect, useState } from "react";
 import { Button, Col, Container, Spinner } from "react-bootstrap";
 import { FlipCoin_backend } from "declarations/FlipCoin_backend";
+import { e8sToIcp } from "../../scripts/e8s";
 
-function Header({ refreshControl, setShowTopUpModal }) {
-  const [triggerRefresh, setTriggerRefresh] = refreshControl;
+function Header({
+  refreshControl,
+  setShowTopUpModal,
+  accountBalance,
+  accountCredit,
+  isWalletConnected,
+  flipCoinCanisterBalance,
+}) {
+  const [onChainBalance, setOnChainBalance] = useState(0);
+  const [refresh, toggleRefresh] = refreshControl;
   const [lastFlipId, setLastFlipId] = useState(0);
   const [flipHistory, setFlipHistory] = useState([]);
   const [stats, setStats] = useState({
@@ -66,12 +75,11 @@ function Header({ refreshControl, setShowTopUpModal }) {
     padding: "5px 5px",
   };
   useEffect(() => {
-    console.log(`test2`);
-  }, []);
+    console.log(`Account balance changed.`, accountBalance);
+  }, [accountBalance]);
 
   useEffect(() => {
     const fromBackendFetch_RecentFlips = async () => {
-      console.log(`logging...`);
       // Get last flip id
       FlipCoin_backend.getLastFlipId().then((id) => {
         setLastFlipId(id);
@@ -79,26 +87,23 @@ function Header({ refreshControl, setShowTopUpModal }) {
 
         // Get history with paging
         FlipCoin_backend.getFlipHistory(start, id).then((flips) => {
-          console.log(`logging2...`);
-
           console.log(`flip history: `, flips);
           setFlipHistory(flips);
         });
       });
     };
     fromBackendFetch_RecentFlips();
-  }, [triggerRefresh]);
+  }, [refresh]);
 
   useEffect(() => {
     const fromBackendFetch_Statistics = async () => {
       // Get count of tails and heads occurences
       FlipCoin_backend.getStatistics().then((statistics) => {
         setStats({ initialized: true, ...statistics });
-        console.log(`statistic: `, statistics);
       });
     };
     fromBackendFetch_Statistics();
-  }, [triggerRefresh]);
+  }, [refresh]);
 
   return (
     <Container
@@ -107,7 +112,9 @@ function Header({ refreshControl, setShowTopUpModal }) {
       className="d-flex flex-row justify-content-between align-items-center"
     >
       <Col xs={1} md={2}>
-        <p style={containerTextStyle}>House Funds: 150 $ICP</p>
+        <p style={containerTextStyle}>
+          House Funds: {e8sToIcp(flipCoinCanisterBalance)} $ICP
+        </p>
       </Col>
       <Col xs={8} md={5}>
         <Container
@@ -125,7 +132,22 @@ function Header({ refreshControl, setShowTopUpModal }) {
         </Container>
       </Col>
 
-      <Col xs={2} md={3}>
+      <Col xs={2} md={2}>
+        {accountBalance === 0 || accountBalance ? (
+          <Container className="d-flex flex-column justify-content-center align-items-start column-gap-1">
+            <p style={containerTextStyle}>
+              On-chain: {e8sToIcp(accountBalance).toString()} ICP
+            </p>
+            <p style={containerTextStyle}>
+              Credit: {e8sToIcp(accountCredit).toString()} ICP
+            </p>
+          </Container>
+        ) : (
+          <Spinner />
+        )}
+      </Col>
+
+      <Col xs={2} md={2}>
         {stats && stats.initialized ? (
           <Container className="d-flex flex-row justify-content-center align-items-center column-gap-1">
             <p style={containerTextStyle}>
@@ -141,7 +163,7 @@ function Header({ refreshControl, setShowTopUpModal }) {
       </Col>
 
       <Col xs={1} md={"auto"}>
-        <p style={containerTextStyle}>Connect Wallet</p>
+        {!isWalletConnected && <p style={containerTextStyle}>Connect Wallet</p>}
         <p onClick={() => setShowTopUpModal(true)} style={containerTextStyle}>
           Top Up
         </p>
