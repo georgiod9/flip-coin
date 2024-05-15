@@ -96,6 +96,13 @@ actor FlipCoin {
   // public query func getCanisterAccount() : async Blob {
   //   canisterDefaultAccount();
   // };
+  public shared (msg) func retrieveAccountBalance() : async Nat {
+
+    let userBalance = book.fetchUserIcpBalance(msg.caller, icp_ledger_id);
+    Debug.print(Principal.toText(msg.caller) # " ICP balance: " # Nat.toText(userBalance));
+    return userBalance;
+
+  };
 
   public func getICPBalance() : async ?Nat64 {
     let accountPrincipal = Principal.fromActor(FlipCoin);
@@ -230,15 +237,21 @@ actor FlipCoin {
     let source_account = Account.accountIdentifier(Principal.fromActor(FlipCoin), Account.principalToSubaccount(msg.caller));
 
     let source_account_nat_array = Blob.toArray(source_account);
+    // let source_account_nat_array = source_account;
+
     // Check ledger for value
     let balance = await IcpLedger.account_balance({
       account = source_account_nat_array;
     });
 
     let subAcc = Blob.toArray(Account.principalToSubaccount(msg.caller));
+    // let subAcc = Account.principalToSubaccount(msg.caller);
 
     let destination_deposit_identifier = Account.accountIdentifier(Principal.fromActor(FlipCoin), Account.defaultSubaccount());
+
     let destination = Blob.toArray(destination_deposit_identifier);
+    // let destination = destination_deposit_identifier;
+
     // Transfer to default subaccount
     let icp_receipt = if (Nat64.toNat(balance.e8s) > icp_fee) {
       await IcpLedger.transfer({
@@ -444,6 +457,8 @@ actor FlipCoin {
     );
 
     let destination_address = Blob.toArray(Principal.toLedgerAccount(args.toPrincipal, args.toSubaccount));
+    // let destination_address = Principal.toLedgerAccount(args.toPrincipal, args.toSubaccount);
+
     let transferArgs : IcpLedger.TransferArgs = {
       // can be used to distinguish between transactions
       memo = 0;

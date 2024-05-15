@@ -112,5 +112,18 @@ module {
                 case null return false;
             };
         };
+
+        public func fetchUserIcpBalance(user : Principal, token : Principal) : Nat {
+            Debug.print("Fetching user balance for " # Principal.toText(user));
+            switch (book.get(user)) {
+                case (?balances) {
+                    switch (balances.get(token)) {
+                        case (?balance) return balance;
+                        case null return 0;
+                    };
+                };
+                case null return 0;
+            };
+        };
     };
 };
