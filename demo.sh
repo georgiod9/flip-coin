@@ -47,7 +47,7 @@ dfx canister --identity default call icp_ledger_canister transfer "(record { to 
 
 # transfer to user dev 1 id: 10000 principal: dx6vz-vhqey-xdj7o-k4mbs-5x76l-7gst4-aee6m-rfalm-bqams-gjkd3-fae
 DEV2_ACCOUNT_PRINCIPAL="dx6vz-vhqey-xdj7o-k4mbs-5x76l-7gst4-aee6m-rfalm-bqams-gjkd3-fae"
-DEV1_ACCOUNT_PRINCIPAL="akwhr-ay6mj-hkrh2-xfnsg-47kh3-dsnfy-jbe3x-x2iuq-4frjj-76csk-6ae"
+DEV1_ACCOUNT_PRINCIPAL="s7rkk-6yycj-tys5p-7wbqa-hrs62-25tww-4skdd-woom6-o4qsu-godbi-aqe"
 
 
 dfx canister call FlipCoin_backend transfer "(record { amount = record { e8s = 100_000_000 }; toPrincipal = principal \"${DEV1_ACCOUNT_PRINCIPAL}\"})"
