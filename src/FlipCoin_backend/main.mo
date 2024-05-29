@@ -44,7 +44,8 @@ actor FlipCoin {
   let icp_fee : Nat = 10_000;
   let ledger : Principal = Principal.fromActor(IcpLedger);
 
-  var icp_ledger_id : Principal = Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai");
+  var icp_ledger_id : Principal = Principal.fromText("bkyz2-fmaaa-aaaaa-qaaaq-cai"); //DEV
+  // var icp_ledger_id : Principal = Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai"); //PROD
 
   var _headsRate : Float = 0;
   var _headsCount : Nat = 0;
@@ -60,6 +61,9 @@ actor FlipCoin {
   // User balance datastructure
   private var book = B.Book();
   private stable var book_stable : [var (Principal, [(T.Token, Nat)])] = [var];
+
+  private var funder : Principal = Principal.fromText("b4nbh-fwspd-e6ep6-2izbs-5tydj-nidz2-jllq2-zxfl2-33oe6-j4bnn-5qe");
+  private var totalFunds : Nat = 0;
 
   type DepositArgs = {
     amount : Tokens;
@@ -89,6 +93,29 @@ actor FlipCoin {
     memo : Nat64;
   };
 
+  // system func timer(setGlobalTimer : Nat64 -> ()) : async () {
+  //   let next = Nat64.fromIntWrap(Time.now()) + 20_000_000_000;
+  //   setGlobalTimer(next); // absolute time in nanoseconds
+
+  //   let ledgerId = await getICPLedgerId();
+
+  //   // Get the initial balance of the contract
+  //   let balanceOpt = await getICPBalance();
+
+  //   // Check if the balance is available and add it to the book
+  //   switch (balanceOpt) {
+  //     case (?balance) {
+  //       // Adding tokens to the book for the contract's principal
+  //       book.addTokens(Principal.fromActor(FlipCoin), ledgerId, Nat64.toNat(balance));
+  //       Debug.print("Updated ledger balance on init.");
+
+  //     };
+  //     case (null) {
+  //       Debug.print("Failed to retrieve initial balance.");
+  //     };
+  //   };
+  // };
+
   // private func canisterDefaultAccount() : Blob {
   //   Account.accountIdentifier(Principal.fromActor(FlipCoin), Account.defaultSubaccount());
   // };
@@ -102,6 +129,11 @@ actor FlipCoin {
     Debug.print(Principal.toText(msg.caller) # " ICP balance: " # Nat.toText(userBalance));
     return userBalance;
 
+  };
+
+  public shared (msg) func adminClearBook() {
+    book.clear();
+    Debug.print("Book cleared.");
   };
 
   public func getICPBalance() : async ?Nat64 {
@@ -228,23 +260,22 @@ actor FlipCoin {
     };
   };
 
-  // After user transfers ICP to the target subaccount
-  public shared (msg) func depositIcp() : async T.DepositReceipt {
+  private func deposit(from : Principal, balance : Nat64) : async T.DepositReceipt {
 
-    Debug.print("Principal of user:" # Principal.toText(msg.caller));
+    Debug.print("Principal of depositer:" # Principal.toText(from));
 
-    // Calculate target subaccount
-    let source_account = Account.accountIdentifier(Principal.fromActor(FlipCoin), Account.principalToSubaccount(msg.caller));
+    // // Calculate target subaccount
+    // let source_account = Account.accountIdentifier(Principal.fromActor(FlipCoin), Account.principalToSubaccount(from));
 
-    let source_account_nat_array = Blob.toArray(source_account);
-    // let source_account_nat_array = source_account;
+    // let source_account_nat_array = Blob.toArray(source_account);
+    // // let source_account_nat_array = source_account;
 
-    // Check ledger for value
-    let balance = await IcpLedger.account_balance({
-      account = source_account_nat_array;
-    });
+    // // Check ledger for value
+    // let balance = await IcpLedger.account_balance({
+    //   account = source_account_nat_array;
+    // });
 
-    let subAcc = Blob.toArray(Account.principalToSubaccount(msg.caller));
+    let subAcc = Blob.toArray(Account.principalToSubaccount(from));
     // let subAcc = Account.principalToSubaccount(msg.caller);
 
     let destination_deposit_identifier = Account.accountIdentifier(Principal.fromActor(FlipCoin), Account.defaultSubaccount());
@@ -253,12 +284,12 @@ actor FlipCoin {
     // let destination = destination_deposit_identifier;
 
     // Transfer to default subaccount
-    let icp_receipt = if (Nat64.toNat(balance.e8s) > icp_fee) {
+    let icp_receipt = if (Nat64.toNat(balance) > icp_fee) {
       await IcpLedger.transfer({
         memo : Nat64 = 0;
         from_subaccount = ?subAcc;
         to = destination;
-        amount = { e8s = balance.e8s - Nat64.fromNat(icp_fee) };
+        amount = { e8s = balance - Nat64.fromNat(icp_fee) };
         fee = { e8s = Nat64.fromNat(icp_fee) };
         created_at_time = ?{
           timestamp_nanos = Nat64.fromNat(Int.abs(Time.now()));
@@ -274,16 +305,90 @@ actor FlipCoin {
       };
       case _ {};
     };
-    let available = { e8s : Nat = Nat64.toNat(balance.e8s) - icp_fee };
+    let available = { e8s : Nat = Nat64.toNat(balance) - icp_fee };
 
-    Debug.print("Principal: " # Principal.toText(msg.caller));
+    Debug.print("Principal: " # Principal.toText(from));
     Debug.print("Available: " # Nat.toText(available.e8s));
 
     // keep track of deposited ICP
-    book.addTokens(msg.caller, ledger, available.e8s);
+    addCredit(from, ledger, available.e8s);
 
-    // Return result
-    #Ok(available.e8s);
+    return #Ok(available.e8s);
+  };
+
+  // After user transfers ICP to the target subaccount
+  public shared (msg) func depositIcp() : async T.DepositReceipt {
+
+    // Calculate target subaccount
+    let source_account = Account.accountIdentifier(Principal.fromActor(FlipCoin), Account.principalToSubaccount(msg.caller));
+
+    let source_account_nat_array = Blob.toArray(source_account);
+    // let source_account_nat_array = source_account;
+
+    // Check ledger for value
+    let balance = await IcpLedger.account_balance({
+      account = source_account_nat_array;
+    });
+
+    let result = await deposit(msg.caller, balance.e8s);
+    switch result {
+      case (#Ok(available)) {
+        return #Ok(available);
+      };
+      case (#Err(error)) {
+        return #Err(error);
+      };
+    };
+
+  };
+
+  public shared (msg) func adminDeposit(amount : Nat64) : async T.DepositReceipt {
+    // Calculate target subaccount
+    let source_account = Account.accountIdentifier(Principal.fromActor(FlipCoin), Account.principalToSubaccount(funder));
+
+    let source_account_nat_array = Blob.toArray(source_account);
+    // let source_account_nat_array = source_account;
+
+    // Check ledger for value
+    let balance = await IcpLedger.account_balance({
+      account = source_account_nat_array;
+    });
+
+    Debug.print("Balance of sender: " # Nat64.toText(balance.e8s));
+
+    let result = await deposit(funder, amount);
+    switch result {
+      case (#Ok(available)) {
+        return #Ok(available);
+      };
+      case (#Err(error)) {
+        return #Err(error);
+      };
+    };
+
+  };
+
+  private func addCredit(to : Principal, token : T.Token, amount : Nat) {
+    book.addTokens(to, token, amount);
+    totalFunds := totalFunds + amount;
+  };
+
+  private func removeCredit(from : Principal, token : T.Token, amount : Nat) : Nat {
+    let newBalanceOpt = book.removeTokens(from, token, amount);
+    switch (newBalanceOpt) {
+      case (?newBalance) {
+
+        // Adjust canister funds
+        totalFunds := totalFunds - amount;
+        Debug.print("Removed " # Nat.toText(amount) # "from canister funds.");
+        Debug.print("User new balance " # Nat.toText(newBalance));
+        return newBalance;
+      };
+      case (null) {
+        return 0;
+      };
+    };
+
   };
 
   public shared (msg) func submitFlip(bidSide : Bool, bidAmount_e8s : Nat64) : async Text {
@@ -303,25 +408,47 @@ actor FlipCoin {
       // Update last flip count
       lastFlipId := lastFlipId + 1;
 
-      // Evaluate round result
-      if (bidSide == flipResultBool) {
-        let isPaid = await withdrawReward(bidAmount_e8s, msg.caller);
+      let houseBalanceOpt = await getICPBalance();
+      switch (houseBalanceOpt) {
+        case (?houseBalance) {
+          // Evaluate round result
 
-        // User wins
-        return "Congratulations! You guessed right. The coin landed on " # outcome # ".";
-      } else {
-        // User loses
-        // Update user balance records
-        let ledgerId = await getICPLedgerId();
+          if (bidSide != flipResultBool) {
+            let ledgerId = await getICPLedgerId();
 
-        let newBalance = book.removeTokens(msg.caller, ledgerId, Nat64.toNat(bidAmount_e8s));
+            let newBalance = book.removeTokens(msg.caller, ledgerId, Nat64.toNat(bidAmount_e8s));
 
-        return "Sorry! You guessed wrong. The coin landed on " # outcome # ".";
+            return "Sorry! You guessed wrong. The coin landed on " # outcome # ".";
+          };
+
+          // Calculate reward
+          let reward = (bidAmount_e8s * 95) / 100;
+
+          // Check if house has enough balance to cover transaction value
+          if (Nat64.toNat(houseBalance) < Nat64.toNat(reward) + icp_fee) {
+            return "House balance low.";
+          };
+
+          // User won
+          // Add reward credit to user
+          addCredit(msg.caller, ledgerId, Nat64.toNat(reward));
+          let isRemoved = removeCredit(Principal.fromActor(FlipCoin), ledgerId, Nat64.toNat(reward));
+
+          if (isRemoved == 0) {
+            return "Cannot transfer credit from house account.";
+          };
+
+          return "Congratulations! You guessed right. The coin landed on " # outcome # ". You won " # Nat.toText(isRemoved) # " ICP";
+
+        };
+        case (null) {
+          return "Unable to retrieve house balance.";
+        };
       };
+
     } else {
       return "Balance not enough. Please deposit funds to continue.";
     };
-
   };
 
   // Transfer user reward
