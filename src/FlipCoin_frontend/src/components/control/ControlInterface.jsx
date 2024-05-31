@@ -4,12 +4,18 @@ import { FlipCoin_backend } from "declarations/FlipCoin_backend";
 import Spacer from "../Spacer";
 import coinIcon from "../../assets/coin.png";
 import "./flip.css";
+import { depositTokens } from "../../scripts/topUp";
+import { e8sToIcp, icpToE8s } from "../../scripts/e8s";
+import { getUserDepositAddress } from "../../scripts/getPrincipal";
+import { retrieveTransferFee } from "../../scripts/fee";
 
 function ControlInterface({
   backendActor,
   callToaster,
   toggleRefresh,
   refreshControl,
+  identifiedActor,
+  identifiedIcpActor,
 }) {
   const [lastFlipId, setLastFlipId] = useState(0);
   const [flipHistory, setFlipHistory] = useState([]);
@@ -100,6 +106,83 @@ function ControlInterface({
     callToaster(true, `Bid Placed`, `You're bidding ${amount} ICP.`, 2000);
   };
 
+  const topUp = async (amount) => {
+    const amountInE8s = icpToE8s(
+      parseFloat(amount + e8sToIcp(retrieveTransferFee()))
+    );
+
+    console.log(`Amount in e8s`, amountInE8s);
+    try {
+      // Retrieve deposit address
+      const userDepositAddress = await getUserDepositAddress(identifiedActor);
+
+      console.log(`userDepositAddress`, userDepositAddress);
+
+      const transferArgs = {
+        to: userDepositAddress,
+        from_subaccount: [],
+        created_at_time: [],
+        memo: BigInt(0x1),
+        amount: { e8s: BigInt(Number(amountInE8s) + retrieveTransferFee()) },
+        fee: { e8s: retrieveTransferFee() },
+      };
+      console.log(`transferArgs`, transferArgs);
+
+      const result = await identifiedIcpActor.transfer(transferArgs);
+      console.log("Transfer token result:", result);
+      console.log("Transfer token result.ok:", result.Ok);
+
+      const isDeposited = await triggerDepositTokens(bidAmount);
+      console.log(`Is Deposited`, isDeposited);
+      if (!isDeposited) {
+        console.error(`Failed to deposit tokens`);
+        callToaster(
+          false,
+          `Deposit Failed`,
+          `Failed to deposit ${e8sToIcp(amount)}.`,
+          1500
+        );
+
+        return false;
+      } else {
+        callToaster(
+          true,
+          `Deposit Success`,
+          `Deposited ${e8sToIcp(amount)}.`,
+          1500
+        );
+      }
+      console.log(`Deposit complete.`);
+
+      // setShow(false);
+
+      // Refresh components
+      // toggleRefresh();
+      return true;
+    } catch (error) {
+      console.error("Error during transfer:", error);
+    }
+  };
+
+  const triggerDepositTokens = async (bidAmount) => {
+    try {
+      if (!identifiedActor) {
+        throw new Error("Backend actor not identified.");
+      }
+      const deposit = await depositTokens(identifiedActor);
+      console.log(`deposit:`, deposit);
+      console.log(`deposit.Ok:`, deposit.Ok);
+
+      if (deposit && deposit.Ok >= bidAmount) {
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      return null;
+    }
+  };
+
   const handleSubmitFlip = async () => {
     // Validate backend service instance
     if (!backendActor) {
@@ -116,12 +199,19 @@ function ControlInterface({
       return;
     }
 
+    // let bidAmountIcp = bidAmount * 10 ** 8;
+
+    const isTopped = await topUp(bidAmount);
+    if (!isTopped) {
+      callToaster(false, `Flip Failed`, `ICP deposit failed.`, 1500);
+      return;
+    }
+
     callToaster(true, `Flipping coin`, `Please wait for result.`, 1500);
 
     console.log(`Flipping coin...`);
-    let bidAmountIcp = bidAmount * 10 ** 8;
     const bidSide = selectedSide === 1 ? true : false;
-    const result = await backendActor.submitFlip(bidSide, bidAmountIcp);
+    const result = await backendActor.submitFlip(bidSide, icpToE8s(bidAmount));
     console.log(`result: `, result);
 
     toggleRefresh();

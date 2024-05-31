@@ -212,6 +212,8 @@ function App() {
           backendActor={actor}
           callToaster={callToaster}
           toggleRefresh={toggleRefresh}
+          identifiedActor={identifiedActor}
+          identifiedIcpActor={identifiedIcpLedgerActor}
           refreshControl={[triggerRefresh, setTriggerRefresh]}
         />
       </div>
