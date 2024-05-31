@@ -339,7 +339,6 @@ actor FlipCoin {
         return #Err(error);
       };
     };
-
   };
 
   public shared (msg) func adminDeposit(amount : Nat64) : async T.DepositReceipt {
@@ -412,37 +411,48 @@ actor FlipCoin {
       switch (houseBalanceOpt) {
         case (?houseBalance) {
           // Evaluate round result
+          let newBalance = book.removeTokens(msg.caller, ledgerId, Nat64.toNat(bidAmount_e8s));
 
           if (bidSide != flipResultBool) {
             let ledgerId = await getICPLedgerId();
 
-            let newBalance = book.removeTokens(msg.caller, ledgerId, Nat64.toNat(bidAmount_e8s));
+            // let newBalance = book.removeTokens(msg.caller, ledgerId, Nat64.toNat(bidAmount_e8s));
 
             return "Sorry! You guessed wrong. The coin landed on " # outcome # ".";
           };
 
           // Calculate reward
-          let reward = (bidAmount_e8s * 95) / 100;
+          let reward = bidAmount_e8s + (bidAmount_e8s * 95) / 100;
 
-          // Check if house has enough balance to cover transaction value
-          if (Nat64.toNat(houseBalance) < Nat64.toNat(reward) + icp_fee) {
-            return "House balance low.";
+          let rewardTransferResult = await withdrawBid(bidAmount_e8s, msg.caller);
+
+          if (rewardTransferResult) {
+            // return "Reward transferred.";
+            return "Congratulations! You guessed right. The coin landed on " # outcome # ". You won " # Nat64.toText(reward) # " ICP";
+
+          } else {
+            return "Failed to transfer reward. Use the withdraw rewards method instead.";
           };
 
-          // User won
-          // Add reward credit to user
-          addCredit(msg.caller, ledgerId, Nat64.toNat(reward));
-          let isRemoved = removeCredit(Principal.fromActor(FlipCoin), ledgerId, Nat64.toNat(reward));
+          // // Check if house has enough balance to cover transaction value
+          // if (Nat64.toNat(houseBalance) < Nat64.toNat(reward) + icp_fee) {
+          //   return "House balance low.";
+          // };
 
-          if (isRemoved == 0) {
-            return "Cannot transfer credit from house account.";
-          };
+          // // User won
+          // // Add reward credit to user
+          // addCredit(msg.caller, ledgerId, Nat64.toNat(reward));
+          // let isRemoved = removeCredit(Principal.fromActor(FlipCoin), ledgerId, Nat64.toNat(reward));
 
-          return "Congratulations! You guessed right. The coin landed on " # outcome # ". You won " # Nat.toText(isRemoved) # " ICP";
+          // if (isRemoved == 0) {
+          //   return "Cannot transfer credit from house account.";
+          // };
+
+          // return "Congratulations! You guessed right. The coin landed on " # outcome # ". You won " # Nat.toText(isRemoved) # " ICP";
 
         };
         case (null) {
-          return "Unable to retrieve house balance.";
+          return "Unable to retrieve house balance. Retrieve credits using withdraw rewards method.";
         };
       };
 
@@ -488,10 +498,10 @@ actor FlipCoin {
     return true;
   };
 
-  private func depositBid(bidAmount_e8s : Nat64, to : Principal) : async Bool {
+  private func withdrawBid(bidAmount_e8s : Nat64, to : Principal) : async Bool {
 
     try {
-      let reward = (bidAmount_e8s * 95) / 100;
+      let reward = bidAmount_e8s + (bidAmount_e8s * 95) / 100;
 
       let transferResult = await transfer({
         amount = { e8s = reward };
