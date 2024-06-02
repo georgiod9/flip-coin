@@ -1,0 +1,5 @@
+.main-container-interface-border {
+  height: 50vh;
+  border: 4px solid red;
+  border-radius: 40px;
+}
