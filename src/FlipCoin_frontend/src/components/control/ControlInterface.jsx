@@ -2,12 +2,15 @@ import { useEffect, useState } from "react";
 import { Button, Card, Col, Container, Row, Spinner } from "react-bootstrap";
 import { FlipCoin_backend } from "declarations/FlipCoin_backend";
 import Spacer from "../Spacer";
-import coinIcon from "../../assets/coin.png";
+// import coinIcon from "../../assets/coin.png";
+import coinIcon from "../../assets/svg/coin.svg";
 import "./flip.css";
 import { depositTokens } from "../../scripts/topUp";
 import { e8sToIcp, icpToE8s } from "../../scripts/e8s";
 import { getUserDepositAddress } from "../../scripts/getPrincipal";
 import { retrieveTransferFee } from "../../scripts/fee";
+import SelectButton from "../Select-button/SelectButton";
+import BetSizeSelector from "../BetSizeSelector/BetSizeSelector";
 
 function ControlInterface({
   backendActor,
@@ -19,7 +22,6 @@ function ControlInterface({
 }) {
   const [lastFlipId, setLastFlipId] = useState(0);
   const [flipHistory, setFlipHistory] = useState([]);
-  console.log(`stared`);
   const [selectedSide, setSelectedSide] = useState(-1); // -1 unselected, 0 tails, 1 heads
   const [bidAmount, setBidAmount] = useState(0);
 
@@ -31,7 +33,7 @@ function ControlInterface({
     headsCount: null,
   });
   const containerBorder = {
-    width: window.innerWidth < 450 ? "80vw" : "50vw",
+    width: window.innerWidth < 450 ? "80vw" : "100vw",
     height: "auto",
     margin: "auto auto",
     padding: "10px 10px",
@@ -145,6 +147,7 @@ function ControlInterface({
 
         return false;
       } else {
+        console.log(`call deposit success...$$$$$`);
         callToaster(
           true,
           `Deposit Success`,
@@ -201,13 +204,25 @@ function ControlInterface({
 
     // let bidAmountIcp = bidAmount * 10 ** 8;
 
+    callToaster(
+      true,
+      `Depositing ICP`,
+      `Please wait while deposit completes.`,
+      1500
+    );
+
     const isTopped = await topUp(bidAmount);
     if (!isTopped) {
       callToaster(false, `Flip Failed`, `ICP deposit failed.`, 1500);
       return;
     }
 
-    callToaster(true, `Flipping coin`, `Please wait for result.`, 1500);
+    callToaster(
+      true,
+      `Flipping coin`,
+      `Deposit success. Please wait for result.`,
+      2500
+    );
 
     console.log(`Flipping coin...`);
     const bidSide = selectedSide === 1 ? true : false;
@@ -235,63 +250,36 @@ function ControlInterface({
       style={containerBorder}
       className="d-flex flex-column justify-content-between align-items-center row-gap-1"
     >
-      <img
-        className="coin-flip-animation"
-        style={coinIconStyle}
-        src={coinIcon}
-      ></img>
+      <BetSizeSelector
+        betSizeControl={[bidAmount, setBidAmount]}
+        callToaster={callToaster}
+      />
 
-      {/* <Card style={{ ...cardContainerStyle, ...cardStyleUI }}> */}
-      {/* <Card.Body> */}
       <Container style={buttonsContainerStyle}>
         <Row>
-          <Col style={{ padding: "2px 2px" }} xs={6} md={6}>
-            <Button
-              style={headsButtonStyle}
+          <Col style={{ padding: "0px 0px" }} xs={6} md={6}>
+            <SelectButton
+              text={"HEADS"}
               onClick={() => handleChooseSide("heads")}
-            >
-              HEADS
-            </Button>
+              type={"select-side"}
+            />
           </Col>
 
-          <Col style={{ padding: "2px 2px" }} xs={6} md={6}>
-            <Button
-              style={tailsButtonStyle}
+          <Col style={{ padding: "0px 0px" }} xs={6} md={6}>
+            <SelectButton
+              text={"TAILS"}
               onClick={() => handleChooseSide("tails")}
-            >
-              TAILS
-            </Button>
+              type={"select-side"}
+            />
           </Col>
-        </Row>
-
-        <Spacer space={5} />
-        <Row className="justify-content-center">
-          {" "}
-          {/* Center content in the row */}
-          {betAmounts.map((amount, index) => (
-            <Col
-              style={betButtonsColumnStyle}
-              key={index}
-              xs={6}
-              md={4}
-              className="d-flex justify-content-center mb-1"
-            >
-              {" "}
-              {/* Center each button in a column */}
-              <Button
-                onClick={() => handleChooseBetSize(amount)}
-                style={buttonStyle}
-              >
-                {amount} ICP
-              </Button>
-            </Col>
-          ))}
         </Row>
 
         <Row>
-          <Button onClick={handleSubmitFlip} style={flipButtonStyle}>
-            Flip
-          </Button>
+          <SelectButton
+            text={"FLIP"}
+            onClick={() => handleSubmitFlip()}
+            type={"submit-flip"}
+          />
         </Row>
       </Container>
       {/* </Card.Body> */}
