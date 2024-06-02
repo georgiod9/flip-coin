@@ -74,7 +74,7 @@ function App() {
   };
 
   useEffect(() => {
-    console.log(`test`);
+    console.log(`Backend principal`, backendPrincipal);
   }, []);
   useEffect(() => {
     const connectWallet = async () => {
@@ -175,7 +175,7 @@ function App() {
   }, [triggerRefresh, walletIdentity, identifiedActor]);
 
   return (
-    <div>
+    <div className="main-background">
       {showTopUpModal && (
         <TopUpComponent
           refreshControl={[triggerRefresh, toggleRefresh]}
@@ -207,7 +207,7 @@ function App() {
         />
       )}
 
-      <div>
+      <div style={{ maxWidth: "100vw" }}>
         <ControlInterface
           backendActor={actor}
           callToaster={callToaster}

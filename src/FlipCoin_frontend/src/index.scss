@@ -39,3 +39,18 @@ button[type="submit"] {
 #greeting:empty {
   display: none;
 }
+
+
+.main-background {
+  width: 100vw;
+  height: 100vh;
+  background-image: url(./assets/svg/Bg.svg);
+  background-position: center center;
+  background-size: cover;
+}
+
+// .select-button-background {
+//   background-image: url(./assets/svg/Flip_button_container.svg);
+//   background-position: center center;
+//   background-size: cover;
+// }
