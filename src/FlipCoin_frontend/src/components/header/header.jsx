@@ -122,8 +122,11 @@ function Header({
           style={historyContainerStyle}
           className="d-flex flex-row justify-content-center align-items-center column-gap-1"
         >
-          {flipHistory.map((flip) => (
-            <div style={flip.result === true ? headsIconStyle : tailsIconStyle}>
+          {flipHistory.map((flip, index) => (
+            <div
+              key={index}
+              style={flip.result === true ? headsIconStyle : tailsIconStyle}
+            >
               <p style={flipResultTextStyle}>
                 {flip.result === true ? "H" : "T"}
               </p>
