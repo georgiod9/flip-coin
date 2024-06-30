@@ -33,7 +33,7 @@ function SelectButton({ text, onClick, type }) {
         <img
           src={type === "select-side" ? selectButtonImage : submitButtonImage}
           style={buttonStyle}
-          className=""
+          className="glow-effect-rectangle"
         ></img>
         <p style={textStyle}>{text}</p>
       </div>
