@@ -3,9 +3,14 @@ import { Col, Container, Spinner } from "react-bootstrap";
 import { FlipCoin_backend } from "declarations/FlipCoin_backend";
 import { e8sToIcp } from "../../scripts/e8s";
 import houseFundsContainer from "../../assets/svg/Top_Left_House_Fund_container.svg";
+import dollarIcon from "../../assets/svg/dollar_sign.svg";
 import headsTokenImg from "../../assets/svg/Heads_Token.svg";
 import tailsTokenImg from "../../assets/svg/Tails_Token.svg";
+// import coinsContainerImg from "../../assets/svg/top_center_container.svg";
+import coinsContainerImg from "../../assets/svg/coin_history_container.svg";
+
 import "./header.css";
+import AuthIdentity from "../LoginComponent/AuthIdentity";
 
 function Header({
   refreshControl,
@@ -14,6 +19,12 @@ function Header({
   accountCredit,
   isWalletConnected,
   flipCoinCanisterBalance,
+  setWalletIdentity,
+  setIdentifiedIcpLedgerActor,
+  setIsIdentified,
+  setIdentifiedActor,
+  setLedgerCanisterPrincipal,
+  setBackendActor,
 }) {
   const [refresh] = refreshControl;
   const [lastFlipId, setLastFlipId] = useState(0);
@@ -26,9 +37,20 @@ function Header({
     headsCount: null,
   });
 
+  const houseFundsTextStyle = {
+    margin: "0px 0px",
+    whiteSpace: "nowrap",
+    fontSize: "clamp(26px,1.5vw,40px)",
+  };
+
   const tokenImageStyle = {
     // width: "80%",
     // height: "auto",
+  };
+
+  const coinsContainerStyle = {
+    width: "100%",
+    height: "auto",
   };
 
   useEffect(() => {
@@ -84,11 +106,48 @@ function Header({
           // border: "1px solid red",
         }}
       >
-        <img
-          src={houseFundsContainer}
-          style={{ maxWidth: "30vw" }}
-          alt="House Funds"
-        />
+        <div style={{ position: "relative" }}>
+          <img
+            src={houseFundsContainer}
+            style={{ maxWidth: "30vw" }}
+            alt="House Funds"
+          />
+          <div
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "15%",
+              transform: "translate(-50%,-50%)",
+            }}
+          >
+            <img src={dollarIcon}></img>
+          </div>
+
+          <div
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%,-50%)",
+            }}
+          >
+            <p style={houseFundsTextStyle}>
+              House: {e8sToIcp(flipCoinCanisterBalance).toFixed(2).toString()}
+            </p>
+          </div>
+
+          <div
+            style={{
+              position: "absolute",
+              top: "50%",
+              right: "5%",
+              transform: "translate(-50%,-50%)",
+            }}
+          >
+            <p style={houseFundsTextStyle}>$ICP</p>
+          </div>
+        </div>
+
         {/* <p style={containerTextStyle}>
           House Funds: {e8sToIcp(flipCoinCanisterBalance)} $ICP
         </p> */}
@@ -103,25 +162,42 @@ function Header({
         }}
       >
         <Container
-          fluid
-          style={{
-            height: "100%",
-            padding: "15px 35px",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-          className="d-flex flex-row justify-content-center align-items-center header-center-container"
+        // fluid
+        // style={{
+        //   height: "100%",
+        //   // padding: "15px 35px",
+        //   display: "flex",
+        //   justifyContent: "center",
+        //   alignItems: "center",
+        // }}
+        // className="d-flex flex-row justify-content-center align-items-center" //header-center-container
         >
-          {flipHistory.map((flip, index) => (
-            <div key={index}>
-              <img
-                style={tokenImageStyle}
-                src={flip.result === true ? headsTokenImg : tailsTokenImg}
-                alt={flip.result === true ? "Heads" : "Tails"}
-              />
-            </div>
-          ))}
+          <div style={{ position: "relative" }}>
+            <img style={coinsContainerStyle} src={coinsContainerImg}></img>
+            <Container
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%,-50%)",
+              }}
+              className="d-flex flex-row justify-content-center align-items-center"
+            >
+              {flipHistory && flipHistory.length > 0 ? (
+                flipHistory.map((flip, index) => (
+                  <div key={index}>
+                    <img
+                      style={tokenImageStyle}
+                      src={flip.result === true ? headsTokenImg : tailsTokenImg}
+                      alt={flip.result === true ? "Heads" : "Tails"}
+                    />
+                  </div>
+                ))
+              ) : (
+                <Spinner />
+              )}
+            </Container>
+          </div>
         </Container>
       </Col>
 
@@ -133,21 +209,20 @@ function Header({
           top: 0,
           display: "flex",
           alignItems: "center",
-          border: "1px solid blue",
+          // border: "1px solid blue",
         }}
       >
-        {accountBalance === 0 || accountBalance ? (
-          <Container className="d-flex flex-column justify-content-center align-items-start">
-            <p style={{ fontSize: "12px", margin: "0", padding: "0" }}>
-              On-chain: {e8sToIcp(accountBalance).toString()} ICP
-            </p>
-            <p style={{ fontSize: "12px", margin: "0", padding: "0" }}>
-              Credit: {e8sToIcp(accountCredit).toString()} ICP
-            </p>
-          </Container>
-        ) : (
-          <Spinner />
-        )}
+        <AuthIdentity
+          isWalletConnected={isWalletConnected}
+          setWalletIdentity={setWalletIdentity}
+          setIdentifiedIcpLedgerActor={setIdentifiedIcpLedgerActor}
+          setIsIdentified={setIsIdentified}
+          setIdentifiedActor={setIdentifiedActor}
+          setLedgerCanisterPrincipal={setLedgerCanisterPrincipal}
+          setBackendActor={setBackendActor}
+          accountBalance={accountBalance}
+          accountCredit={accountCredit}
+        />
       </Col>
     </Container>
   );
