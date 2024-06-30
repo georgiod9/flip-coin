@@ -257,7 +257,7 @@ function ControlInterface({
 
       <Container style={buttonsContainerStyle}>
         <Row>
-          <Col style={{ padding: "0px 0px" }} xs={6} md={6}>
+          <Col style={{ padding: "5px 5px" }} xs={6} md={6}>
             <SelectButton
               text={"HEADS"}
               onClick={() => handleChooseSide("heads")}
@@ -265,7 +265,7 @@ function ControlInterface({
             />
           </Col>
 
-          <Col style={{ padding: "0px 0px" }} xs={6} md={6}>
+          <Col style={{ padding: "5px 5px" }} xs={6} md={6}>
             <SelectButton
               text={"TAILS"}
               onClick={() => handleChooseSide("tails")}
@@ -275,11 +275,13 @@ function ControlInterface({
         </Row>
 
         <Row>
-          <SelectButton
-            text={"FLIP"}
-            onClick={() => handleSubmitFlip()}
-            type={"submit-flip"}
-          />
+          <Col style={{ padding: "5px 5px" }}>
+            <SelectButton
+              text={"FLIP"}
+              onClick={() => handleSubmitFlip()}
+              type={"submit-flip"}
+            />
+          </Col>
         </Row>
       </Container>
       {/* </Card.Body> */}

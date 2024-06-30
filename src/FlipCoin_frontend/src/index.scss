@@ -54,3 +54,17 @@ button[type="submit"] {
 //   background-position: center center;
 //   background-size: cover;
 // }
+.glow-effect {
+  border-radius: 50%;
+  box-shadow: 0 0 16px 16px rgba(0, 47, 135, 0.5);
+}
+
+
+.glow-effect-rectangle {
+  background: rgba(0, 0, 0, 0); 
+  color: white; /* For text, change as needed */
+  padding: 0px 0px; /* Adjust size as needed */
+  border-radius: 10px; /* Adjust for slight rounding, or remove for sharp corners */
+  box-shadow: 0 0 5px 5px rgba(0, 47, 135, 0.75); /* Adjust color and size of glow */
+  text-align: center; 
+}
