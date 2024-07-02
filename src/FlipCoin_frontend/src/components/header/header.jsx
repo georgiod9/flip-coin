@@ -40,7 +40,7 @@ function Header({
   const houseFundsTextStyle = {
     margin: "0px 0px",
     whiteSpace: "nowrap",
-    fontSize: "clamp(26px,1.5vw,40px)",
+    fontSize: "clamp(16px,0.1vw,40px)",
   };
 
   const tokenImageStyle = {
@@ -51,6 +51,10 @@ function Header({
   const coinsContainerStyle = {
     width: "100%",
     height: "auto",
+  };
+
+  const dollarIconstyle = {
+    width: "clamp(15px,1vw, 30px)",
   };
 
   useEffect(() => {
@@ -109,7 +113,7 @@ function Header({
         <div style={{ position: "relative" }}>
           <img
             src={houseFundsContainer}
-            style={{ maxWidth: "30vw" }}
+            style={{ maxWidth: "20vw" }}
             alt="House Funds"
           />
           <div
@@ -120,20 +124,18 @@ function Header({
               transform: "translate(-50%,-50%)",
             }}
           >
-            <img src={dollarIcon}></img>
+            <img style={dollarIconstyle} src={dollarIcon}></img>
           </div>
 
           <div
             style={{
               position: "absolute",
               top: "50%",
-              left: "50%",
+              left: "30%",
               transform: "translate(-50%,-50%)",
             }}
           >
-            <p style={houseFundsTextStyle}>
-              House: {e8sToIcp(flipCoinCanisterBalance).toFixed(2).toString()}
-            </p>
+            <p style={houseFundsTextStyle}>House</p>
           </div>
 
           <div
@@ -144,7 +146,9 @@ function Header({
               transform: "translate(-50%,-50%)",
             }}
           >
-            <p style={houseFundsTextStyle}>$ICP</p>
+            <p style={houseFundsTextStyle}>
+              {e8sToIcp(flipCoinCanisterBalance).toFixed(2).toString()} $ICP
+            </p>
           </div>
         </div>
 
