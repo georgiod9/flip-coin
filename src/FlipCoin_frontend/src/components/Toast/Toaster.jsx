@@ -13,9 +13,10 @@ export default function Toaster({
   onHide,
   timeout,
   link,
+  overrideTextStyle,
 }) {
   const header = headerContent;
-  const backgroundColor = "#bdbdbd";
+  const backgroundColor = "#260B50";
 
   const [fadeOut, setFadeOut] = useState(false);
 
@@ -68,7 +69,7 @@ export default function Toaster({
         {/* <IconTextRowView text={headerContent} IconComponent={WarningAmberIcon} /> */}
 
         {/* <strong style={{ color: toastStatus ? '#50FF97' : '#FF3131' }} className="me-auto">{headerContent}</strong> */}
-        <small>now</small>
+        <small style={{ color: "white" }}>now</small>
       </Toast.Header>
       <Toast.Body
         style={{ maxWidth: "35vw", backgroundColor: backgroundColor }}
