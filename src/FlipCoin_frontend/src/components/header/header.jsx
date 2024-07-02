@@ -50,6 +50,7 @@ function Header({
 
   const coinsContainerStyle = {
     width: "100%",
+    maxWidth: "clamp(600px,33vw,100%)",
     height: "auto",
   };
 
@@ -209,8 +210,8 @@ function Header({
         xs="auto"
         style={{
           position: "absolute",
-          right: 0,
-          top: 0,
+          right: 5,
+          top: 10,
           display: "flex",
           alignItems: "center",
           // border: "1px solid blue",

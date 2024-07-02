@@ -27,6 +27,16 @@ function SelectButton({ text, onClick, type }) {
     whiteSpace: "nowrap",
     fontSize: "clamp(18px,1.5vw,24px)",
   };
+
+  const buttonPrimaryFontFamily = {
+    fontFamily: "AcuminVariableConcept",
+  };
+  const buttonSecondaryFamily = {
+    fontFamily: "AcuminVariableConcept",
+  };
+
+  const buttonFontStyle =
+    type === "select-side" ? buttonPrimaryFontFamily : buttonSecondaryFamily;
   return (
     <Container style={containerStyle} onClick={onClick}>
       <div style={{ cursor: "pointer" }}>
@@ -35,7 +45,7 @@ function SelectButton({ text, onClick, type }) {
           style={buttonStyle}
           className="glow-effect-rectangle"
         ></img>
-        <p style={textStyle}>{text}</p>
+        <p style={{ ...textStyle, ...buttonFontStyle }}>{text}</p>
       </div>
     </Container>
   );

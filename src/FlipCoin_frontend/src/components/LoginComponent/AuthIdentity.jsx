@@ -20,6 +20,9 @@ function AuthIdentity({
   accountBalance,
   accountCredit,
 }) {
+  const walletButtonStyle = {
+    width: "clamp(300px,15vw,450px)",
+  };
   const connectWalletTextStyle = {
     whiteSpace: "nowrap",
     fontSize: "clamp(18px,1.5vw,24px)",
@@ -97,7 +100,7 @@ function AuthIdentity({
     <Container style={{ cursor: "pointer" }}>
       {isWalletConnected ? (
         <div style={{ position: "relative" }}>
-          <img src={walletButton}></img>
+          <img style={walletButtonStyle} src={walletButton}></img>
           <div
             style={{
               position: "absolute",
@@ -122,7 +125,7 @@ function AuthIdentity({
         </div>
       ) : (
         <div onClick={connectWallet} style={{ position: "relative" }}>
-          <img src={walletButton}></img>
+          <img style={walletButtonStyle} src={walletButton}></img>
           <div
             style={{
               position: "absolute",

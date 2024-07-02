@@ -1,10 +1,32 @@
+
+@font-face {
+  font-family: 'AcuminVariableConcept';
+  src: url('./assets/fonts/AcuminVariableConcept.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'ADVERGT';
+  src: url('./assets/fonts/ADVERGT.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
+
 body {
-  font-family: sans-serif;
+  font-family: 'AcuminVariableConcept', 'ADVERGT', sans-serif;
   font-size: 1.5rem;
   background-color: #2A2D34;
   color: white;
   width: '100vw';
   border-radius: 1px solid red;
+}
+
+p {
+  font-family:  'AcuminVariableConcept';
+  margin: '0';
 }
 
 img {
@@ -68,3 +90,4 @@ button[type="submit"] {
   box-shadow: 0 0 15px 7px rgba(0, 47, 135, 0.75); /* Adjust color and size of glow */
   text-align: center; 
 }
+

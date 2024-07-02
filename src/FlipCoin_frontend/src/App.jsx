@@ -164,7 +164,7 @@ function App() {
   }, [triggerRefresh, walletIdentity, identifiedActor]);
 
   return (
-    <div className="main-background">
+    <div className="main-background" style={{ position: "relative" }}>
       {showTopUpModal && (
         <TopUpComponent
           refreshControl={[triggerRefresh, toggleRefresh]}
@@ -190,6 +190,7 @@ function App() {
         setLedgerCanisterPrincipal={setLedgerCanisterPrincipal}
         setBackendActor={setBackendActor}
       />
+      <Spacer space={"15"} unit={"vh"} />
       {showToaster && (
         <Toaster
           headerContent={toastProps.toastHeader}
@@ -202,7 +203,15 @@ function App() {
         />
       )}
 
-      <div style={{ maxWidth: "100vw" }}>
+      <div
+        style={{
+          maxWidth: "100vw",
+          // positon: "absolute",
+          // top: "50",
+          // left: "50",
+          // transform: "translate(-50%,-50%)",
+        }}
+      >
         <ControlInterface
           backendActor={backendActor}
           callToaster={callToaster}
