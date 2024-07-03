@@ -164,7 +164,7 @@ function App() {
   }, [triggerRefresh, walletIdentity, identifiedActor]);
 
   return (
-    <div className="main-background" style={{ position: "relative" }}>
+    <div className="main-background">
       {showTopUpModal && (
         <TopUpComponent
           refreshControl={[triggerRefresh, toggleRefresh]}
@@ -206,6 +206,7 @@ function App() {
       <div
         style={{
           maxWidth: "100vw",
+          // maxWidth: "100vw",
           // positon: "absolute",
           // top: "50",
           // left: "50",

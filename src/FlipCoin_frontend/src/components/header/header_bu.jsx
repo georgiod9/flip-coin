@@ -26,8 +26,6 @@ function Header({
   setLedgerCanisterPrincipal,
   setBackendActor,
 }) {
-  const [isMobileWidth, setMobileWidth] = useState(false);
-  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
   const [refresh] = refreshControl;
   const [lastFlipId, setLastFlipId] = useState(0);
   const [flipHistory, setFlipHistory] = useState([]);
@@ -46,15 +44,14 @@ function Header({
   };
 
   const tokenImageStyle = {
-    width: "100%",
+    // width: "80%",
     // height: "auto",
   };
 
   const coinsContainerStyle = {
     width: "100%",
-    // maxWidth: "clamp(600px,33vw,100%)",
+    maxWidth: "clamp(600px,33vw,100%)",
     height: "auto",
-    // border: "1px solid red",
   };
 
   const dollarIconstyle = {
@@ -89,40 +86,35 @@ function Header({
     fromBackendFetch_Statistics();
   }, [refresh]);
 
-  // useEffect(() => {
-  //   const screenWidth = window.innerWidth;
-  //   setScreenWidth(screenWidth);
-  //   console.log(`screenwisth;`, screenWidth);
-  //   if (screenWidth < 628) {
-  //     setMobileWidth(true);
-  //     console.log(`movile`);
-  //   }
-  // }, [window.innerWidth]);
-
   return (
-    <div
-      className="header-main-div"
+    <Container
+      fluid
       style={{
+        width: "100vw",
+        height: "max-content",
+        margin: "0",
+        padding: "10px 10px",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
         position: "relative",
-        // border: "1px solid red",
       }}
     >
-      <div
-        className="header-item-1-pos"
-        style={
-          {
-            // position: "absolute",
-            // top: "50%",
-            // left: "10%",
-            // transform: "translate(-50%, 0%)",
-          }
-        }
+      <Col
+        xs="auto"
+        style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          display: "flex",
+          alignItems: "center",
+          // border: "1px solid red",
+        }}
       >
         <div style={{ position: "relative" }}>
           <img
             src={houseFundsContainer}
-            className="house-funds-container-sizing"
-            // style={{ maxWidth: "20vw" }}
+            style={{ maxWidth: "20vw" }}
             alt="House Funds"
           />
           <div
@@ -160,58 +152,70 @@ function Header({
             </p>
           </div>
         </div>
-      </div>
 
-      <div
-        className="header-center-coins-container-pos"
-        style={
-          {
-            // border: "1px solid red",
-            // position: "absolute",
-            // top: "50%",
-            // left: "50%",
-            // transform: "translate(-50%,-40%)",
-          }
-        }
+        {/* <p style={containerTextStyle}>
+          House Funds: {e8sToIcp(flipCoinCanisterBalance)} $ICP
+        </p> */}
+      </Col>
+
+      <Col
+        xs="auto"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          // border: "1px solid green",
+        }}
       >
-        <div style={{ position: "relative" }} className="coins-wrapper">
-          <img style={coinsContainerStyle} src={coinsContainerImg}></img>
-          <Container
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%,-50%)",
-            }}
-            className="d-flex flex-row justify-content-center align-items-center"
-          >
-            {flipHistory && flipHistory.length > 0 ? (
-              flipHistory.map((flip, index) => (
-                <div key={index}>
-                  <img
-                    style={tokenImageStyle}
-                    src={flip.result === true ? headsTokenImg : tailsTokenImg}
-                    alt={flip.result === true ? "Heads" : "Tails"}
-                  />
-                </div>
-              ))
-            ) : (
-              <Spinner />
-            )}
-          </Container>
-        </div>
-      </div>
+        <Container
+        // fluid
+        // style={{
+        //   height: "100%",
+        //   // padding: "15px 35px",
+        //   display: "flex",
+        //   justifyContent: "center",
+        //   alignItems: "center",
+        // }}
+        // className="d-flex flex-row justify-content-center align-items-center" //header-center-container
+        >
+          <div style={{ position: "relative" }}>
+            <img style={coinsContainerStyle} src={coinsContainerImg}></img>
+            <Container
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%,-50%)",
+              }}
+              className="d-flex flex-row justify-content-center align-items-center"
+            >
+              {flipHistory && flipHistory.length > 0 ? (
+                flipHistory.map((flip, index) => (
+                  <div key={index}>
+                    <img
+                      style={tokenImageStyle}
+                      src={flip.result === true ? headsTokenImg : tailsTokenImg}
+                      alt={flip.result === true ? "Heads" : "Tails"}
+                    />
+                  </div>
+                ))
+              ) : (
+                <Spinner />
+              )}
+            </Container>
+          </div>
+        </Container>
+      </Col>
 
-      <div
-        className="header-item-3-pos"
-        style={
-          {
-            // position: "absolute",
-            // top: "50%",
-            // right: "0%",
-            // transform: "translate(0%,10%)",
-          }
-        }
+      <Col
+        xs="auto"
+        style={{
+          position: "absolute",
+          right: 5,
+          top: 10,
+          display: "flex",
+          alignItems: "center",
+          // border: "1px solid blue",
+        }}
       >
         <AuthIdentity
           isWalletConnected={isWalletConnected}
@@ -224,8 +228,8 @@ function Header({
           accountBalance={accountBalance}
           accountCredit={accountCredit}
         />
-      </div>
-    </div>
+      </Col>
+    </Container>
   );
 }
 

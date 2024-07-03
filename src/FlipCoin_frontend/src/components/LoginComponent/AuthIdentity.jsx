@@ -21,18 +21,18 @@ function AuthIdentity({
   accountCredit,
 }) {
   const walletButtonStyle = {
-    width: "clamp(300px,15vw,450px)",
+    width: "clamp(200px,15vw,450px)",
   };
   const connectWalletTextStyle = {
     whiteSpace: "nowrap",
-    fontSize: "clamp(18px,1.5vw,24px)",
+    fontSize: "clamp(16px,1.5vw,24px)",
     margin: "0",
+    padding: "0",
   };
 
   const balanceTextStyle = {
     whiteSpace: "nowrap",
     fontSize: "clamp(12px,1.5vw,20px)",
-
     margin: "0",
   };
   const connectWallet = async () => {
@@ -100,7 +100,11 @@ function AuthIdentity({
     <Container style={{ cursor: "pointer" }}>
       {isWalletConnected ? (
         <div style={{ position: "relative" }}>
-          <img style={walletButtonStyle} src={walletButton}></img>
+          <img
+            className="wallet-button-sizing"
+            // style={walletButtonStyle}
+            src={walletButton}
+          ></img>
           <div
             style={{
               position: "absolute",
@@ -112,11 +116,11 @@ function AuthIdentity({
             {accountBalance === 0 || accountBalance ? (
               <Container className="d-flex flex-column justify-content-center align-items-start">
                 <p style={balanceTextStyle}>
-                  {e8sToIcp(accountBalance).toString()} ICP
+                  {e8sToIcp(accountBalance).toString()} $ICP
                 </p>
-                <p style={balanceTextStyle}>
+                {/* <p style={balanceTextStyle}>
                   Fees: {e8sToIcp(accountCredit).toString()} ICP
-                </p>
+                </p> */}
               </Container>
             ) : (
               <Spinner />
@@ -125,7 +129,11 @@ function AuthIdentity({
         </div>
       ) : (
         <div onClick={connectWallet} style={{ position: "relative" }}>
-          <img style={walletButtonStyle} src={walletButton}></img>
+          <img
+            className="wallet-button-sizing"
+            // style={walletButtonStyle}
+            src={walletButton}
+          ></img>
           <div
             style={{
               position: "absolute",
@@ -134,7 +142,7 @@ function AuthIdentity({
               transform: "translate(-50%,-50%)",
             }}
           >
-            <p style={connectWalletTextStyle}>Connect wallet</p>
+            <p style={connectWalletTextStyle}>Connect</p>
           </div>
         </div>
       )}
