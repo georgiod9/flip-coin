@@ -8,7 +8,13 @@ import coinIcon from "../../assets/svg/coin.svg";
 import bidGlowImg from "../../assets/1x/input-button-glow.png";
 // import "./betsizeselector-style.css";
 
-function BetSizeSelector({ text, onClick, betSizeControl, callToaster }) {
+function BetSizeSelector({
+  text,
+  onClick,
+  betSizeControl,
+  callToaster,
+  isIdentified,
+}) {
   const [bidAmount, setBidAmount] = betSizeControl;
 
   const mainContainerStyle = {
@@ -87,6 +93,11 @@ function BetSizeSelector({ text, onClick, betSizeControl, callToaster }) {
   };
 
   const handleChooseBetSize = (amount) => {
+    if (!isIdentified) {
+      callToaster(false, `Failed`, `Please connect your wallet`, 2000);
+      return;
+    }
+
     setBidAmount(amount);
     callToaster(true, `Bid Placed`, `You're bidding ${amount} ICP.`, 2000);
   };

@@ -113,7 +113,7 @@ function AuthIdentity({
               transform: "translate(-50%,-50%)",
             }}
           >
-            {accountBalance === 0 || accountBalance ? (
+            {accountBalance !== null && isWalletConnected ? (
               <Container className="d-flex flex-column justify-content-center align-items-start">
                 <p style={balanceTextStyle}>
                   {e8sToIcp(accountBalance).toString()} $ICP

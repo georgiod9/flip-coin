@@ -13,6 +13,7 @@ import SelectButton from "../Select-button/SelectButton";
 import BetSizeSelector from "../BetSizeSelector/BetSizeSelector";
 
 function ControlInterface({
+  isIdentified,
   backendActor,
   callToaster,
   toggleRefresh,
@@ -94,6 +95,11 @@ function ControlInterface({
   const betAmounts = [0.1, 0.5, 1, 1.5, 2, 5];
 
   const handleChooseSide = (side) => {
+    if (!isIdentified) {
+      callToaster(false, `Failed`, `Please connect your wallet`, 2000);
+      return;
+    }
+
     if (side === "heads") {
       setSelectedSide(1);
     } else if (side === "tails") {
@@ -187,6 +193,11 @@ function ControlInterface({
   };
 
   const handleSubmitFlip = async () => {
+    if (!isIdentified) {
+      callToaster(false, `Failed`, `Please connect your wallet`, 2000);
+      return;
+    }
+
     // Validate backend service instance
     if (!backendActor) {
       console.log(`Backend instance not defined.`);
@@ -251,6 +262,7 @@ function ControlInterface({
       className="d-flex flex-column justify-content-between align-items-center row-gap-1"
     >
       <BetSizeSelector
+        isIdentified={isIdentified}
         betSizeControl={[bidAmount, setBidAmount]}
         callToaster={callToaster}
       />

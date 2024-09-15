@@ -89,16 +89,6 @@ function Header({
     fromBackendFetch_Statistics();
   }, [refresh]);
 
-  // useEffect(() => {
-  //   const screenWidth = window.innerWidth;
-  //   setScreenWidth(screenWidth);
-  //   console.log(`screenwisth;`, screenWidth);
-  //   if (screenWidth < 628) {
-  //     setMobileWidth(true);
-  //     console.log(`movile`);
-  //   }
-  // }, [window.innerWidth]);
-
   return (
     <div
       className="header-main-div"
