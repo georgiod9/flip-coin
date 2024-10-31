@@ -1,0 +1,5 @@
+.header-center-container {
+  background-image: url(../../assets/svg/top_center_container.svg);
+  background-position: center center;
+  background-size: cover;
+}

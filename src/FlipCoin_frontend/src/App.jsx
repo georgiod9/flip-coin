@@ -6,7 +6,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import ControlInterface from "./components/control/ControlInterface";
 import Spacer from "./components/Spacer";
 import Toaster from "./components/Toast/Toaster";
-import { AuthClient } from "@dfinity/auth-client";
+// import { AuthClient } from "@dfinity/auth-client";
 import { HttpAgent, Actor } from "@dfinity/agent";
 import { TopUpComponent } from "./components/TopUp/TopUpComponent";
 import {
@@ -21,13 +21,14 @@ let actor = FlipCoin_backend;
 let backendPrincipal = process.env.CANISTER_ID_FLIPCOIN_BACKEND;
 
 function App() {
+  const [backendActor, setBackendActor] = useState(FlipCoin_backend);
   const [triggerRefresh, setTriggerRefresh] = useState(false);
   const [walletIdentity, setWalletIdentity] = useState(null);
   const [identifiedActor, setIdentifiedActor] = useState(null);
   const [identifiedIcpLedgerActor, setIdentifiedIcpLedgerActor] =
     useState(null);
   const [showTopUpModal, setShowTopUpModal] = useState(false);
-  const [walletBalance, setWalletBalance] = useState(0);
+  const [walletBalance, setWalletBalance] = useState(null);
   const [accountCredit, setAccountCredit] = useState(0);
   const [isIdentified, setIsIdentified] = useState(false);
 
@@ -74,98 +75,23 @@ function App() {
   };
 
   useEffect(() => {
-    console.log(`test`);
-  }, []);
-  useEffect(() => {
-    const connectWallet = async () => {
-      console.log(`Connecting wallet...`);
-
-      try {
-        // Create an auth client
-        let authClient = await AuthClient.create();
-        console.log(`Auth client init`, authClient);
-
-        // Start the login process and wait for it to finish
-        await new Promise((resolve, reject) => {
-          //safari: http://bw4dl-smaaa-aaaaa-qaacq-cai.localhost:4943/
-          //http://bw4dl-smaaa-aaaaa-qaacq-cai.127.0.0.1:4943/
-          //
-          authClient.login({
-            //
-            identityProvider: `http://bw4dl-smaaa-aaaaa-qaacq-cai.localhost:4943/`,
-            onSuccess: resolve,
-            onError: reject,
-          });
-        });
-        console.log(`Logged in!`);
-
-        console.log(`Getting identity..`);
-        const identity = authClient.getIdentity();
-        console.log(`logged in with identity:`, identity);
-
-        // const principal = identity.getPrincipal();
-
-        // console.log(`logged in with principal:`, principal.toText());
-
-        // const balance = await getWalletOnChainBalance(principal);
-        // setWalletBalance(balance);
-
-        // const ledgerPrincipal = await getLedgerCanisterPrincipal();
-        // console.log(`ledger prinicapl id`, ledgerPrincipal.toText());
-
-        // setLedgerCanisterPrincipal(ledgerPrincipal.toText());
-
-        // Using the identity obtained from the auth client, create an agent to interact with the IC.
-        const agent = new HttpAgent({
-          identity,
-          host: `http://localhost:4943`,
-        });
-        // Using the interface description of our webapp, create an actor that we use to call the service methods.
-        actor = createActor(process.env.CANISTER_ID_FLIPCOIN_BACKEND, {
-          agent,
-        });
-
-        const ledgerPrincipal = await getLedgerCanisterPrincipal();
-        console.log(`ledger prinicapl id`, ledgerPrincipal.toText());
-
-        setLedgerCanisterPrincipal(ledgerPrincipal.toText());
-
-        const icpLedgerActor = setupIdentifiedIcpLedger(agent);
-
-        setIdentifiedIcpLedgerActor(icpLedgerActor);
-        setWalletIdentity(identity);
-        setIsIdentified(true);
-        setIdentifiedActor(actor);
-
-        // const credits = await getFlipCoinCredits(actor);
-
-        // setAccountCredit(credits);
-
-        console.log(`Created new actor from identified agent.`);
-      } catch (error) {
-        console.error("Error during wallet connection:", error);
-      }
-
-      return false;
-    };
-
-    connectWallet();
+    console.log(`Backend principal`, backendPrincipal);
   }, []);
 
   useEffect(() => {
     const getBalances = async () => {
+      const contractBalance = await getFlipCoinCanisterBalance(
+        backendPrincipal
+      );
+      console.log(`FlipCoin contract balance: `, contractBalance);
+      setFlipCoinCanisterBalance(contractBalance);
+
       if (walletIdentity && identifiedActor && ledgerCanisterPrincipal) {
         const principal = walletIdentity.getPrincipal();
-        console.log(`logged in with principal:`, principal.toText());
+        console.log(`Logged in with principal:`, principal.toText());
 
         const balance = await getWalletOnChainBalance(principal);
         setWalletBalance(balance);
-
-        const contractBalance = await getFlipCoinCanisterBalance(
-          backendPrincipal
-        );
-        console.log(`contract bal: `, contractBalance);
-        setFlipCoinCanisterBalance(contractBalance);
 
         const credits = await getFlipCoinCredits(identifiedActor);
         setAccountCredit(credits);
@@ -175,7 +101,7 @@ function App() {
   }, [triggerRefresh, walletIdentity, identifiedActor]);
 
   return (
-    <div>
+    <div className="main-background">
       {showTopUpModal && (
         <TopUpComponent
           refreshControl={[triggerRefresh, toggleRefresh]}
@@ -194,7 +120,14 @@ function App() {
         accountCredit={accountCredit}
         isWalletConnected={isIdentified}
         flipCoinCanisterBalance={flipCoinCanisterBalance}
+        setWalletIdentity={setWalletIdentity}
+        setIdentifiedIcpLedgerActor={setIdentifiedIcpLedgerActor}
+        setIsIdentified={setIsIdentified}
+        setIdentifiedActor={setIdentifiedActor}
+        setLedgerCanisterPrincipal={setLedgerCanisterPrincipal}
+        setBackendActor={setBackendActor}
       />
+      <Spacer space={"15"} unit={"vh"} />
       {showToaster && (
         <Toaster
           headerContent={toastProps.toastHeader}
@@ -207,9 +140,19 @@ function App() {
         />
       )}
 
-      <div>
+      <div
+        style={{
+          maxWidth: "100vw",
+          // maxWidth: "100vw",
+          // positon: "absolute",
+          // top: "50",
+          // left: "50",
+          // transform: "translate(-50%,-50%)",
+        }}
+      >
         <ControlInterface
-          backendActor={actor}
+          isIdentified={isIdentified}
+          backendActor={backendActor}
           callToaster={callToaster}
           toggleRefresh={toggleRefresh}
           identifiedActor={identifiedActor}

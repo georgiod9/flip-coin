@@ -1,10 +1,32 @@
+
+@font-face {
+  font-family: 'AcuminVariableConcept';
+  src: url('./assets/fonts/AcuminVariableConcept.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'ADVERGT';
+  src: url('./assets/fonts/ADVERGT.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
+
 body {
-  font-family: sans-serif;
+  font-family: 'AcuminVariableConcept', 'ADVERGT', sans-serif;
   font-size: 1.5rem;
   background-color: #2A2D34;
   color: white;
   width: '100vw';
   border-radius: 1px solid red;
+}
+
+p {
+  font-family:  'AcuminVariableConcept';
+  margin: '0';
 }
 
 img {
@@ -39,3 +61,119 @@ button[type="submit"] {
 #greeting:empty {
   display: none;
 }
+
+
+
+.main-background {
+  width: 100vw;
+  height: 100vh;
+  background-image: url(../src/assets/svg/Bg.svg);
+  background-position: center center;
+  background-size: cover;
+}
+
+
+.header-main-div {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-center-coins-container-pos {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-40%);
+}
+.coins-wrapper {
+  width: 100%;
+}
+
+.header-item-1-pos{
+  order: 0;
+}
+.header-item-2-pos{
+  order: 1;
+}
+.header-item-3-pos{
+  order: 2;
+}
+.house-funds-container-sizing {
+  max-width: 20vw;
+}
+
+.wallet-button-sizing {
+  width: clamp(200px,15vw,450px);
+}
+
+@media(max-width: 628px) {
+  .header-main-div {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .header-center-coins-container-pos {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,100%);
+  }
+  .coins-wrapper {
+    width: 100vw;
+  }
+  
+  .header-item-1-pos{
+    order: 0;
+  }
+  .header-item-2-pos{
+    order: 2;
+  }
+  .header-item-3-pos{
+    order: 1;
+  }
+  .house-funds-container-sizing {
+    max-width: 50vw;
+  }
+  
+}
+
+@media(max-width: 460px) {
+  .house-funds-container-sizing {
+    max-width: 55vw;
+  }
+  .wallet-button-sizing {
+    width: 40vw;
+  }  
+}
+
+@media(max-width: 333px) {
+  .house-funds-container-sizing {
+    max-width: 70vw;
+  }
+  .wallet-button-sizing {
+    width: 20vw;
+  }  
+}
+
+// .select-button-background {
+//   background-image: url(./assets/svg/Flip_button_container.svg);
+//   background-position: center center;
+//   background-size: cover;
+// }
+.glow-effect {
+  border-radius: 50%;
+  box-shadow: 0 0 16px 16px rgba(0, 47, 135, 0.5);
+}
+
+
+.glow-effect-rectangle {
+  background: rgba(0, 0, 0, 0); 
+  color: white; 
+  padding: 0px 0px; 
+  border-radius: 30px; /* Adjust for rounding */
+  box-shadow: 0 0 15px 7px rgba(0, 47, 135, 0.75); /* Adjust color and size of glow */
+  text-align: center; 
+}
+

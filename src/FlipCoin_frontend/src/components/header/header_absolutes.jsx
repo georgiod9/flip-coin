@@ -26,8 +26,6 @@ function Header({
   setLedgerCanisterPrincipal,
   setBackendActor,
 }) {
-  const [isMobileWidth, setMobileWidth] = useState(false);
-  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
   const [refresh] = refreshControl;
   const [lastFlipId, setLastFlipId] = useState(0);
   const [flipHistory, setFlipHistory] = useState([]);
@@ -46,15 +44,14 @@ function Header({
   };
 
   const tokenImageStyle = {
-    width: "100%",
+    // width: "80%",
     // height: "auto",
   };
 
   const coinsContainerStyle = {
     width: "100%",
-    // maxWidth: "clamp(600px,33vw,100%)",
+    maxWidth: "clamp(600px,33vw,100%)",
     height: "auto",
-    // border: "1px solid red",
   };
 
   const dollarIconstyle = {
@@ -91,28 +88,31 @@ function Header({
 
   return (
     <div
-      className="header-main-div"
+      // fluid
       style={{
+        // paddingTop: "100px",
+        // width: "100vw",
+        // height: "max-content",
+        // margin: "0",
+        // padding: "10px 10px",
+        // display: "flex",
+        // justifyContent: "center",
+        // alignItems: "center",
         position: "relative",
-        // border: "1px solid red",
       }}
     >
       <div
-        className="header-item-1-pos"
-        style={
-          {
-            // position: "absolute",
-            // top: "50%",
-            // left: "10%",
-            // transform: "translate(-50%, 0%)",
-          }
-        }
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "10%",
+          transform: "translate(-50%, 0%)",
+        }}
       >
         <div style={{ position: "relative" }}>
           <img
             src={houseFundsContainer}
-            className="house-funds-container-sizing"
-            // style={{ maxWidth: "20vw" }}
+            style={{ maxWidth: "20vw" }}
             alt="House Funds"
           />
           <div
@@ -152,19 +152,28 @@ function Header({
         </div>
       </div>
 
+      {/* <p style={containerTextStyle}>
+          House Funds: {e8sToIcp(flipCoinCanisterBalance)} $ICP
+        </p> */}
+
       <div
-        className="header-center-coins-container-pos"
-        style={
-          {
-            // border: "1px solid red",
-            // position: "absolute",
-            // top: "50%",
-            // left: "50%",
-            // transform: "translate(-50%,-40%)",
-          }
-        }
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%,0%)",
+        }}
+        // fluid
+        // style={{
+        //   height: "100%",
+        //   // padding: "15px 35px",
+        //   display: "flex",
+        //   justifyContent: "center",
+        //   alignItems: "center",
+        // }}
+        // className="d-flex flex-row justify-content-center align-items-center" //header-center-container
       >
-        <div style={{ position: "relative" }} className="coins-wrapper">
+        <div style={{ position: "relative" }}>
           <img style={coinsContainerStyle} src={coinsContainerImg}></img>
           <Container
             style={{
@@ -193,15 +202,12 @@ function Header({
       </div>
 
       <div
-        className="header-item-3-pos"
-        style={
-          {
-            // position: "absolute",
-            // top: "50%",
-            // right: "0%",
-            // transform: "translate(0%,10%)",
-          }
-        }
+        style={{
+          position: "absolute",
+          top: "50%",
+          right: "0%",
+          transform: "translate(0%,10%)",
+        }}
       >
         <AuthIdentity
           isWalletConnected={isWalletConnected}
