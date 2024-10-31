@@ -39,6 +39,11 @@ module {
         entropyBlob : Blob;
     };
 
+    public type CoinTossResult = {
+        result : Bool;
+        entropyBlob : Blob;
+    };
+
     public type Statistics = {
         tailsRate : Float;
         tailsCount : Int;
