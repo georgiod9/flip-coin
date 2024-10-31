@@ -80,18 +80,18 @@ function App() {
 
   useEffect(() => {
     const getBalances = async () => {
+      const contractBalance = await getFlipCoinCanisterBalance(
+        backendPrincipal
+      );
+      console.log(`FlipCoin contract balance: `, contractBalance);
+      setFlipCoinCanisterBalance(contractBalance);
+
       if (walletIdentity && identifiedActor && ledgerCanisterPrincipal) {
         const principal = walletIdentity.getPrincipal();
-        console.log(`logged in with principal:`, principal.toText());
+        console.log(`Logged in with principal:`, principal.toText());
 
         const balance = await getWalletOnChainBalance(principal);
         setWalletBalance(balance);
-
-        const contractBalance = await getFlipCoinCanisterBalance(
-          backendPrincipal
-        );
-        console.log(`contract bal: `, contractBalance);
-        setFlipCoinCanisterBalance(contractBalance);
 
         const credits = await getFlipCoinCredits(identifiedActor);
         setAccountCredit(credits);
