@@ -83,7 +83,7 @@ function App() {
       const contractBalance = await getFlipCoinCanisterBalance(
         backendPrincipal
       );
-      console.log(`FlipCoin contract balance: `, contractBalance);
+      console.log(`Contract balance:`, contractBalance);
       setFlipCoinCanisterBalance(contractBalance);
 
       if (walletIdentity && identifiedActor && ledgerCanisterPrincipal) {
@@ -98,7 +98,12 @@ function App() {
       }
     };
     getBalances();
-  }, [triggerRefresh, walletIdentity, identifiedActor]);
+  }, [
+    triggerRefresh,
+    walletIdentity,
+    identifiedActor,
+    ledgerCanisterPrincipal,
+  ]);
 
   return (
     <div className="main-background">
