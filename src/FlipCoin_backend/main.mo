@@ -389,7 +389,7 @@ shared (msg) actor class FlipCoin() = this {
 
   private func _settleBetWin(user : Principal, bidAmount_e8s : Nat64) : async Bool {
     let ledgerId = await getICPLedgerId();
-    let totalReward = (bidAmount_e8s * _rewardMultiplier) / 100;
+    let totalReward = _calculateReward(bidAmount_e8s);
 
     let houseBalance = await getHouseBalance();
     switch (houseBalance) {
@@ -400,7 +400,7 @@ shared (msg) actor class FlipCoin() = this {
 
           let debug_available_to_withdraw = book.fetchUserIcpBalance(user, icp_ledger_id);
           Debug.print("Available rewards for withdrawal: " # Nat.toText(debug_available_to_withdraw));
-          let _isTransferred = await _withdrawBid(user);
+          let _isTransferred = await _withdrawBid(user, totalReward);
         } else {
           return false;
         };
@@ -437,8 +437,11 @@ shared (msg) actor class FlipCoin() = this {
     };
 
   };
+  private func _calculateReward(bidAmount_e8s : Nat64) : Nat64 {
+    return (bidAmount_e8s * _rewardMultiplier) / 100;
+  };
 
-  private func _withdrawBid(to : Principal) : async Bool {
+  private func _withdrawBid(to : Principal, reward_e8s : Nat64) : async Bool {
     try {
       let amount = book.fetchUserIcpBalance(to, icp_ledger_id);
 
@@ -451,6 +454,7 @@ shared (msg) actor class FlipCoin() = this {
       switch (transferResult) {
         case (#ok(blockIndex)) {
           let _userBalance = _removeCredit(to, icp_ledger_id, amount);
+          let _canisterBalance = _removeCredit(Principal.fromActor(this), icp_ledger_id, Nat64.toNat(reward_e8s)); // remove reward from canister
 
           // If the transfer was successful, return true
           Debug.print("Reward transfer: " # Nat64.toText(Nat64.fromNat(amount) / 100000000) # " to principal: " # Principal.toText(to) # ".");
