@@ -10,7 +10,6 @@ import coinsContainerImg from "../../assets/svg/coin_history_container.svg";
 
 import "./header.css";
 import AuthIdentity from "../LoginComponent/AuthIdentity";
-import { FlipHistory } from "../FlipHistory/FlipHistory";
 
 function Header({
   refreshControl,
@@ -43,6 +42,18 @@ function Header({
     margin: "0px 0px",
     whiteSpace: "nowrap",
     fontSize: "clamp(16px,0.1vw,40px)",
+  };
+
+  const tokenImageStyle = {
+    width: "100%",
+    // height: "auto",
+  };
+
+  const coinsContainerStyle = {
+    width: "100%",
+    // maxWidth: "clamp(600px,33vw,100%)",
+    height: "auto",
+    // border: "1px solid red",
   };
 
   const dollarIconstyle = {
@@ -167,7 +178,32 @@ function Header({
           }
         }
       >
-        <FlipHistory flipHistory={flipHistory} statistics={stats} />
+        <div style={{ position: "relative" }} className="coins-wrapper">
+          <img style={coinsContainerStyle} src={coinsContainerImg}></img>
+          <Container
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%,-50%)",
+            }}
+            className="d-flex flex-row justify-content-center align-items-center"
+          >
+            {flipHistory && flipHistory.length > 0 ? (
+              flipHistory.map((flip, index) => (
+                <div key={index}>
+                  <img
+                    style={tokenImageStyle}
+                    src={flip.result === true ? headsTokenImg : tailsTokenImg}
+                    alt={flip.result === true ? "Heads" : "Tails"}
+                  />
+                </div>
+              ))
+            ) : (
+              <Spinner />
+            )}
+          </Container>
+        </div>
       </div>
 
       <div
