@@ -29,6 +29,9 @@ import Types "types";
 shared (msg) actor class FlipCoin() = this {
   private stable var owner : Principal = msg.caller;
 
+  private let MIN_HOUSE_COVERAGE_RATIO = 10.0; // House must have at least 10x the max possible payout
+  private let MAX_BET_RATIO = 0.01; // Maximum bet can be 1% of house balance
+
   let icp_fee : Nat = 10_000;
   let ledger : Principal = Principal.fromActor(IcpLedger);
   private stable var _entropyUsedCount : Nat = 0;
@@ -76,30 +79,23 @@ shared (msg) actor class FlipCoin() = this {
     let cumulativeUserBalance = book.getUsersCumulativeBalance(Principal.fromActor(this), icp_ledger_id);
     switch (canisterBalance) {
       case (?balance) {
-        var difference : Nat = Nat64.toNat(balance) - cumulativeUserBalance;
+        var difference : Nat64 = (balance) - Nat64.fromNat(cumulativeUserBalance);
         var canisterCredits = await getHouseBalance();
 
-        switch (canisterCredits) {
-          case (?credits) {
-            if (difference > credits) {
-              var _newCredits = _addCredit(Principal.fromActor(this), icp_ledger_id, difference - credits);
-              Debug.print("RebalanceBook: Canister ICP balance is greater than credits. Rebalancing.");
-            };
-            if (difference < credits) {
-              var _newCredits = _removeCredit(Principal.fromActor(this), icp_ledger_id, credits - difference);
-              Debug.print("RebalanceBook: Canister ICP balance is less than credits. Rebalancing.");
-            };
-            if (difference == credits) {
-              Debug.print("RebalanceBook: Canister ICP balance matches credits. Nothing to do.");
-            };
-            return true;
-          };
-          case (null) {
-            Debug.print("RebalanceBook: Failed to get canister's credits from book.");
-            return false;
-          };
+        if (Nat64.toNat(difference) > canisterCredits) {
+          var _newCredits = _addCredit(Principal.fromActor(this), icp_ledger_id, Nat64.toNat(difference) - canisterCredits);
+          Debug.print("RebalanceBook: Canister ICP balance is greater than credits. Rebalancing.");
         };
+        if (Nat64.toNat(difference) < canisterCredits) {
+          var _newCredits = _removeCredit(Principal.fromActor(this), icp_ledger_id, canisterCredits - Nat64.toNat(difference));
+          Debug.print("RebalanceBook: Canister ICP balance is less than credits. Rebalancing.");
+        };
+        if (Nat64.toNat(difference) == canisterCredits) {
+          Debug.print("RebalanceBook: Canister ICP balance matches credits. Nothing to do.");
+        };
+        return true;
       };
+
       case (null) {
         Debug.print("RebalanceBook: Failed to get canister ICP balance.");
         return false;
@@ -148,11 +144,6 @@ shared (msg) actor class FlipCoin() = this {
     return true;
   };
 
-  public shared (msg) func retrieveAccountBalance() : async Nat {
-    let userBalance = book.fetchUserIcpBalance(msg.caller, icp_ledger_id);
-    return userBalance;
-  };
-
   public shared (msg) func adminClearBook() : async Result.Result<(Text), Text> {
     if (not isOwner(msg.caller)) {
       return #err("Only the owner can clear the book");
@@ -162,9 +153,31 @@ shared (msg) actor class FlipCoin() = this {
     #ok("Book cleared.");
   };
 
-  public func getHouseBalance() : async ?Nat {
-    let balance = book.fetchUserIcpBalance(Principal.fromActor(this), icp_ledger_id);
-    return ?balance;
+  // Returns available balance for house in book
+  public func getHouseBalance() : async Nat {
+    let balance : Nat = book.fetchUserIcpBalance(Principal.fromActor(this), icp_ledger_id);
+    return balance;
+  };
+
+  // Returns the caller's available credits in book
+  public shared (msg) func getCredits() : async Nat {
+    let available = book.fetchUserIcpBalance(msg.caller, icp_ledger_id);
+    return available;
+  };
+
+  public shared (msg) func getPendingDeposits() : async T.Tokens {
+    // Calculate target subaccount
+    let source_account = Account.accountIdentifier(Principal.fromActor(this), Account.principalToSubaccount(msg.caller));
+
+    let source_account_nat_array = Blob.toArray(source_account); // Comment out for vite build
+    // let source_account_nat_array = source_account; // Uncomment for vite build
+
+    // Check ledger for value
+    let balance = await IcpLedger.account_balance({
+      account = source_account_nat_array;
+    });
+
+    return balance;
   };
 
   public func getICPBalance() : async ?Nat64 {
@@ -336,6 +349,11 @@ shared (msg) actor class FlipCoin() = this {
     return #Ok(available.e8s);
   };
 
+  private func _calculateMaxBet(houseBalance : Nat) : Nat64 {
+    let maxBetFloat = Float.fromInt(houseBalance) * MAX_BET_RATIO;
+    return Nat64.fromNat(Int.abs(Float.toInt(maxBetFloat)));
+  };
+
   // TODO Return receipt instead of text message
   public shared (msg) func submitFlip(bidSide : Bool, bidAmount_e8s : Nat64) : async Text {
     let ledgerId = await getICPLedgerId();
@@ -352,39 +370,41 @@ shared (msg) actor class FlipCoin() = this {
     let outcome = if (flipResult.result) "Heads" else "Tails";
     Debug.print("Coin flip outcome: " # outcome);
 
+    let houseBalance = await getHouseBalance();
+    let potentialPayout = _calculateReward(bidAmount_e8s);
+
+    // Check if house has enough coverage
+    if (Float.fromInt(houseBalance) < Float.fromInt(Nat64.toNat(potentialPayout)) * MIN_HOUSE_COVERAGE_RATIO) {
+      return "House coverage ratio too low. Please try a smaller bet.";
+    };
+
+    // Check if bet exceeds max amount
+    let maxBet = _calculateMaxBet(houseBalance);
+    if (bidAmount_e8s > maxBet) {
+      return "Bet exceeds max limit of " # Nat64.toText(maxBet / 100000000) # "ICP";
+    };
+
+    // Record flip after house validation
     await registerFlip(flipResult.entropyBlob, flipResult.result);
 
-    // Update last flip count
-    lastFlipId := lastFlipId + 1;
-
-    let houseBalanceOpt = await getICPBalance();
-    // let houseBalanceOpt = getHouseBalance();
-    /// TODO: Remove the switch statement
-    switch (houseBalanceOpt) {
-      case (?_houseBalance) {
-        // Evaluate round result
-        // User lost - Decrease user amount in book by bet size
-        // Increase canister amount in book by bet size
-        if (bidSide != flipResult.result) {
-          await _settleBetLoss(msg.caller, bidAmount_e8s);
-          return "Sorry! You guessed wrong. The coin landed on " # outcome # ".";
-        };
-        // User won - Decrease amount in book by bet size
-        // Decrease canister's amount in book by reward amount
-        let _isSettled = await _settleBetWin(msg.caller, bidAmount_e8s);
-
-        if (_isSettled) {
-          return "Congratulations! You guessed right. The coin landed on " # outcome # ".";
-
-        } else {
-          return "Failed to transfer reward. Use the withdraw rewards method instead.";
-        };
-
-      };
-      case (null) {
-        return "Unable to retrieve house balance. Retrieve credits using withdraw rewards method.";
-      };
+    // Evaluate round result
+    // User lost - Decrease user amount in book by bet size
+    // Increase canister amount in book by bet size
+    if (bidSide != flipResult.result) {
+      await _settleBetLoss(msg.caller, bidAmount_e8s);
+      return "Sorry! You guessed wrong. The coin landed on " # outcome # ".";
     };
+    // User won - Decrease amount in book by bet size
+    // Decrease canister's amount in book by reward amount
+    let _isSettled = await _settleBetWin(msg.caller, bidAmount_e8s);
+
+    if (_isSettled) {
+      return "Congratulations! You guessed right. The coin landed on " # outcome # ".";
+
+    } else {
+      return "Failed to transfer reward. Use the withdraw rewards method instead.";
+    };
+
   };
 
   private func _settleBetWin(user : Principal, bidAmount_e8s : Nat64) : async Bool {
@@ -392,22 +412,16 @@ shared (msg) actor class FlipCoin() = this {
     let totalReward = _calculateReward(bidAmount_e8s);
 
     let houseBalance = await getHouseBalance();
-    switch (houseBalance) {
-      case (?balance) {
-        Debug.print("Settling win. House balance: " # Nat.toText(balance));
-        if (balance >= Nat64.toNat(totalReward)) {
-          let _userBalance = _addCredit(user, ledgerId, Nat64.toNat(totalReward));
 
-          let debug_available_to_withdraw = book.fetchUserIcpBalance(user, icp_ledger_id);
-          Debug.print("Available rewards for withdrawal: " # Nat.toText(debug_available_to_withdraw));
-          let _isTransferred = await _withdrawBid(user, totalReward);
-        } else {
-          return false;
-        };
-      };
-      case (null) {
-        return false;
-      };
+    Debug.print("Settling win. House balance: " # Nat.toText(houseBalance));
+    if (houseBalance >= Nat64.toNat(totalReward)) {
+      let _userBalance = _addCredit(user, ledgerId, Nat64.toNat(totalReward));
+
+      let debug_available_to_withdraw = book.fetchUserIcpBalance(user, icp_ledger_id);
+      Debug.print("Available rewards for withdrawal: " # Nat.toText(debug_available_to_withdraw));
+      let _isTransferred = await _withdrawBid(user, totalReward);
+    } else {
+      return false;
     };
   };
 
@@ -495,6 +509,9 @@ shared (msg) actor class FlipCoin() = this {
 
     // Add the new flip to the history
     flipHistory.add(newFlip);
+
+    // Update last flip count
+    lastFlipId := lastFlipId + 1;
   };
 
   /// Develop use only / remove for production
