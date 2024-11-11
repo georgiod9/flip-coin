@@ -1,6 +1,7 @@
 import { Principal } from "@dfinity/principal";
 import { icp_ledger_canister } from "declarations/icp_ledger_canister";
 import { FlipCoin_backend, createActor } from "declarations/FlipCoin_backend";
+import { e8sToIcp } from "./e8s";
 // Define the Account structure based on the candid definition
 
 export const getWalletOnChainBalance = async (principal) => {
@@ -40,18 +41,18 @@ export const getFlipCoinCanisterBalance = async () => {
 
         console.log(`Attempting to get house balance....`)
         const houseBalance = await FlipCoin_backend.getHouseBalance();
-        console.log(`House balance: `, houseBalance);
+        console.log(`House balance: `, e8sToIcp(houseBalance));
 
-        return houseBalance.length > 0 ? houseBalance[0] : null;
+        return houseBalance;
     } catch (error) {
-        console.error(`getBalance: Error getting wallet balance.`, error);
+        console.error(`getBalance: Error getting flipcoin canister balance.`, error);
         return null;
     }
 };
 
 export const getFlipCoinCredits = async (identifiedActor) => {
     try {
-        const balanceFlipcoin = await identifiedActor.retrieveAccountBalance();
+        const balanceFlipcoin = await identifiedActor.getCredits();
 
         return balanceFlipcoin;
     } catch (error) {

@@ -188,6 +188,7 @@ function ControlInterface({
 
       return false;
     } catch (error) {
+      console.error(`Failed to deposit icp:`, error);
       return null;
     }
   };

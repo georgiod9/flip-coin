@@ -51,6 +51,12 @@ module {
         headsCount : Int;
     };
 
+    public type HouseStatistics = {
+        multiplier : Nat;
+        historicalBets : Nat;
+        historicalWinnings : Nat;
+    };
+
     public type TransactionNotification = {
         fromPrincipal : Principal;
         amount : Nat64; // Amount in e8s
