@@ -29,8 +29,18 @@ import Types "types";
 shared (msg) actor class FlipCoin() = this {
   private stable var owner : Principal = msg.caller;
 
+  private let BASE_REWARD_MULTIPLIER : Nat64 = 95; // 95% base payout
+  private let MAX_REWARD_MULTIPLIER : Nat64 = 97; // Maximum 97% payout
+  private let MIN_REWARD_MULTIPLIER : Nat64 = 90; // Minimum 90% payout
+
+  private let TARGET_EDGE_MIN : Float = 3.0; // Minimum 3% edge
+  private let TARGET_EDGE_MAX : Float = 7.0; // Maximum 7% edge
+
   private let MIN_HOUSE_COVERAGE_RATIO = 10.0; // House must have at least 10x the max possible payout
   private let MAX_BET_RATIO = 0.01; // Maximum bet can be 1% of house balance
+
+  private stable var _totalHistoricalBets : Nat = 0;
+  private stable var _totalHistoricalWinnings : Nat = 0;
 
   let icp_fee : Nat = 10_000;
   let ledger : Principal = Principal.fromActor(IcpLedger);
@@ -351,7 +361,57 @@ shared (msg) actor class FlipCoin() = this {
 
   private func _calculateMaxBet(houseBalance : Nat) : Nat64 {
     let maxBetFloat = Float.fromInt(houseBalance) * MAX_BET_RATIO;
+    Debug.print("[_calculateMaxBet]: Max bet is " # Float.toText(maxBetFloat));
     return Nat64.fromNat(Int.abs(Float.toInt(maxBetFloat)));
+  };
+
+  // Calculate potential payout for a bet
+  private func _calculatePotentialPayout(betAmount : Nat64) : Nat {
+    Nat64.toNat(betAmount * _rewardMultiplier) / 100;
+  };
+
+  private func _calculateHouseEdge() : Float {
+    if (_totalHistoricalBets == 0) return 0;
+
+    let edge = (Float.fromInt(_totalHistoricalBets - _totalHistoricalWinnings) / Float.fromInt(_totalHistoricalBets)) * 100.0;
+    return edge;
+  };
+
+  public func getRewardsMultiplier() : async Nat64 {
+    return _rewardMultiplier;
+  };
+
+  // Make owner only
+  // Develop only
+  public func getHouseStatistics() : async T.HouseStatistics {
+    let rewardsMultiplier = _adjustRewardMultiplier();
+
+    return {
+      multiplier = Nat64.toNat(rewardsMultiplier);
+      historicalBets = _totalHistoricalBets;
+      historicalWinnings = _totalHistoricalWinnings;
+    };
+  };
+
+  private func _adjustRewardMultiplier() : Nat64 {
+    let currentEdge = _calculateHouseEdge();
+
+    if (currentEdge < TARGET_EDGE_MIN) {
+      let adjustment = Float.min(TARGET_EDGE_MIN - currentEdge, 5.0);
+      let newMultiplier = Float.max(Float.fromInt(Nat64.toNat(MIN_REWARD_MULTIPLIER)), Float.fromInt(Nat64.toNat(BASE_REWARD_MULTIPLIER)) - adjustment);
+
+      Debug.print("Adjusting reward multiplier down to " # Float.toText(newMultiplier));
+      return Nat64.fromNat(Int.abs(Float.toInt(newMultiplier)));
+    } else if (currentEdge > TARGET_EDGE_MAX) {
+      let adjustment = Float.min(currentEdge - TARGET_EDGE_MAX, 5.0);
+      let newMultiplier = Float.min(Float.fromInt(Nat64.toNat(MAX_REWARD_MULTIPLIER)), Float.fromInt(Nat64.toNat(BASE_REWARD_MULTIPLIER)) + adjustment);
+
+      Debug.print("Adjusting reward multiplier up to " # Float.toText(newMultiplier));
+      return Nat64.fromNat(Int.abs(Float.toInt(newMultiplier)));
+    } else {
+      Debug.print("Reward multiplier is within target range. No adjustment needed.");
+      return BASE_REWARD_MULTIPLIER;
+    };
   };
 
   // TODO Return receipt instead of text message
@@ -363,14 +423,14 @@ shared (msg) actor class FlipCoin() = this {
       return "Balance not enough. Please deposit funds to continue.";
     };
 
-    // Heads is true, Tails is false
-    let flipResult = await getCoinTossResult();
-
-    // Debug the outcome
-    let outcome = if (flipResult.result) "Heads" else "Tails";
-    Debug.print("Coin flip outcome: " # outcome);
-
     let houseBalance = await getHouseBalance();
+
+    // Update reward multiplier based on house balance
+    _rewardMultiplier := _adjustRewardMultiplier();
+
+    _totalHistoricalBets += Nat64.toNat(bidAmount_e8s);
+
+    // Calculate potential payout with updated reward multiplier
     let potentialPayout = _calculateReward(bidAmount_e8s);
 
     // Check if house has enough coverage
@@ -380,9 +440,17 @@ shared (msg) actor class FlipCoin() = this {
 
     // Check if bet exceeds max amount
     let maxBet = _calculateMaxBet(houseBalance);
+    // Debug.print("[submitFlip] max bet return value:" # Nat.toText(maxBet));
     if (bidAmount_e8s > maxBet) {
-      return "Bet exceeds max limit of " # Nat64.toText(maxBet / 100000000) # "ICP";
+      return "Bet exceeds max limit of " # Float.toText(Float.fromInt(Nat64.toNat(maxBet)) / 100000000) # "ICP";
     };
+
+    // Heads is true, Tails is false
+    let flipResult = await getCoinTossResult();
+
+    // Debug the outcome
+    let outcome = if (flipResult.result) "Heads" else "Tails";
+    Debug.print("Coin flip outcome: " # outcome);
 
     // Record flip after house validation
     await registerFlip(flipResult.entropyBlob, flipResult.result);
@@ -410,6 +478,8 @@ shared (msg) actor class FlipCoin() = this {
   private func _settleBetWin(user : Principal, bidAmount_e8s : Nat64) : async Bool {
     let ledgerId = await getICPLedgerId();
     let totalReward = _calculateReward(bidAmount_e8s);
+
+    _totalHistoricalWinnings += Nat64.toNat(totalReward);
 
     let houseBalance = await getHouseBalance();
 
