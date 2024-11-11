@@ -14,8 +14,8 @@ import {
   getFlipCoinCredits,
   getWalletOnChainBalance,
 } from "./scripts/getBalance";
-import { getLedgerCanisterPrincipal } from "./scripts/getPrincipal";
-import { setupIdentifiedIcpLedger } from "./scripts/icpLedger";
+
+import { getHouseStatistics } from "./scripts/getHouse";
 
 let actor = FlipCoin_backend;
 let backendPrincipal = process.env.CANISTER_ID_FLIPCOIN_BACKEND;
@@ -95,6 +95,9 @@ function App() {
 
         const credits = await getFlipCoinCredits(identifiedActor);
         setAccountCredit(credits);
+
+        const houseStatistics = await getHouseStatistics();
+        console.log(`House stats: `, houseStatistics);
       }
     };
     getBalances();
