@@ -1,10 +1,10 @@
+import Array "mo:base/Array";
 import IcpLedger "canister:icp_ledger_canister";
 import Debug "mo:base/Debug";
 import Result "mo:base/Result";
 import Option "mo:base/Option";
 import Blob "mo:base/Blob";
 import Error "mo:base/Error";
-import Array "mo:base/Array";
 import Principal "mo:base/Principal";
 
 import Buffer "mo:base/Buffer";
@@ -14,30 +14,22 @@ import Nat32 "mo:base/Nat32";
 import Nat64 "mo:base/Nat64";
 import Random "mo:base/Random";
 import Time "mo:base/Time";
-import Iter "mo:base/Iter";
 import Float "mo:base/Float";
 import Bool "mo:base/Bool";
 
 import Account "./Account";
 import Int "mo:base/Int";
+import Iter "mo:base/Iter";
 
 import T "types";
 import B "book";
 import M "mo:base/HashMap";
 import Types "types";
+import H "house";
+import G "getter";
 
 shared (msg) actor class FlipCoin() = this {
   private stable var owner : Principal = msg.caller;
-
-  private let BASE_REWARD_MULTIPLIER : Nat64 = 95; // 95% base payout
-  private let MAX_REWARD_MULTIPLIER : Nat64 = 97; // Maximum 97% payout
-  private let MIN_REWARD_MULTIPLIER : Nat64 = 90; // Minimum 90% payout
-
-  private let TARGET_EDGE_MIN : Float = 3.0; // Minimum 3% edge
-  private let TARGET_EDGE_MAX : Float = 7.0; // Maximum 7% edge
-
-  private let MIN_HOUSE_COVERAGE_RATIO = 10.0; // House must have at least 10x the max possible payout
-  private let MAX_BET_RATIO = 0.01; // Maximum bet can be 1% of house balance
 
   private stable var _totalHistoricalBets : Nat = 0;
   private stable var _totalHistoricalWinnings : Nat = 0;
@@ -62,8 +54,11 @@ shared (msg) actor class FlipCoin() = this {
   var flipHistory : Buffer.Buffer<Types.Flip> = Buffer.Buffer<Types.Flip>(0);
 
   private stable var book_stable : [(Principal, [(T.Token, Nat)])] = [];
+
   // User balance datastructure
   private var book = B.Book();
+  private var house = H.House();
+  private var getter = G.Getter();
 
   system func preupgrade() {
     Debug.print("Preupgrade: Preparing to sync flip history and book.");
@@ -113,6 +108,13 @@ shared (msg) actor class FlipCoin() = this {
     };
   };
 
+  // Set the owner of the canister
+  public shared (msg) func setOwner(newOwner : Principal) : async Result.Result<Principal, Text> {
+    assert (msg.caller == owner);
+    owner := newOwner;
+    #ok(newOwner);
+  };
+
   /// Develop use only
   public shared (msg) func printBalances() {
     book.print_balances();
@@ -124,11 +126,8 @@ shared (msg) actor class FlipCoin() = this {
   };
 
   /// Develop use only
-  // Return the account ID specific to this user's subaccount
   public shared (msg) func getDepositAddressArray() : async [Nat8] {
-    let accountIdentifier = Account.accountIdentifier(Principal.fromActor(this), Account.principalToSubaccount(msg.caller));
-    let accountIdentifierArray = Blob.toArray(accountIdentifier);
-    return accountIdentifierArray;
+    return await getter.getDepositAccountIdArray(Principal.fromActor(this), msg.caller);
   };
 
   /// Develop use only
@@ -139,13 +138,6 @@ shared (msg) actor class FlipCoin() = this {
   /// Develop use only
   public func getEntropyUsedCount() : async Nat {
     return _entropyUsedCount;
-  };
-
-  // Set the owner of the canister
-  public shared (msg) func setOwner(newOwner : Principal) : async Result.Result<Principal, Text> {
-    assert (msg.caller == owner);
-    owner := newOwner;
-    #ok(newOwner);
   };
 
   // Only Owner modifier
@@ -163,50 +155,6 @@ shared (msg) actor class FlipCoin() = this {
     #ok("Book cleared.");
   };
 
-  // Returns available balance for house in book
-  public func getHouseBalance() : async Nat {
-    let balance : Nat = book.fetchUserIcpBalance(Principal.fromActor(this), icp_ledger_id);
-    return balance;
-  };
-
-  // Returns the caller's available credits in book
-  public shared (msg) func getCredits() : async Nat {
-    let available = book.fetchUserIcpBalance(msg.caller, icp_ledger_id);
-    return available;
-  };
-
-  public shared (msg) func getPendingDeposits() : async T.Tokens {
-    // Calculate target subaccount
-    let source_account = Account.accountIdentifier(Principal.fromActor(this), Account.principalToSubaccount(msg.caller));
-
-    let source_account_nat_array = Blob.toArray(source_account); // Comment out for vite build
-    // let source_account_nat_array = source_account; // Uncomment for vite build
-
-    // Check ledger for value
-    let balance = await IcpLedger.account_balance({
-      account = source_account_nat_array;
-    });
-
-    return balance;
-  };
-
-  public func getICPBalance() : async ?Nat64 {
-    let accountPrincipal = Principal.fromActor(this);
-    // Convert principal to account id
-    let accountIdentifier = await IcpLedger.account_identifier({
-      owner = accountPrincipal;
-      subaccount = null;
-    });
-
-    // Make inter canister call for balance
-    let balanceResult = await IcpLedger.account_balance({
-      account = accountIdentifier;
-    });
-
-    // Return the balance in e8s (1 ICP = 1e8 e8s).
-    return ?balanceResult.e8s;
-  };
-
   public shared ({ caller }) func setICPCanisterId(newId : Text) : async Result.Result<(), Text> {
     if (caller != owner) {
       return #err("Only the owner can set the ICP canister ID");
@@ -215,8 +163,47 @@ shared (msg) actor class FlipCoin() = this {
     #ok();
   };
 
+  // Returns available balance for house in book
+  public func getHouseBalance() : async Nat {
+    return book.fetchUserIcpBalance(Principal.fromActor(this), icp_ledger_id);
+  };
+
+  // Returns the caller's available credits in book
+  public shared (msg) func getCredits() : async Nat {
+    return book.fetchUserIcpBalance(msg.caller, icp_ledger_id);
+  };
+
+  public shared (msg) func getPendingDeposits() : async T.Tokens {
+    return await getter.getPendingDeposits(Principal.fromActor(this), msg.caller);
+  };
+
+  public func getICPBalance() : async ?Nat64 {
+    return await getter.getICPBalance(Principal.fromActor(this));
+  };
+
   public func getICPLedgerId() : async Principal {
     return icp_ledger_id;
+  };
+
+  public func getLastFlipId() : async Nat {
+    return lastFlipId;
+  };
+
+  public func getFlipHistory(start : Nat, end : Nat) : async [Types.Flip] {
+    return await getter.getFlipHistory(flipHistory, start, end);
+  };
+
+  // Return the account ID specific to this user's subaccount
+  public shared (msg) func getDepositAddress() : async Blob {
+    return await getter.getDepositAccountId(Principal.fromActor(this), msg.caller);
+  };
+
+  public func getRewardsMultiplier() : async Nat64 {
+    return _rewardMultiplier;
+  };
+
+  public shared (msg) func whoami() : async Principal {
+    return msg.caller;
   };
 
   public func getStatistics() : async Types.Statistics {
@@ -248,35 +235,6 @@ shared (msg) actor class FlipCoin() = this {
     };
   };
 
-  public func getLastFlipId() : async Nat {
-    return lastFlipId;
-  };
-
-  public func getFlipHistory(start : Nat, end : Nat) : async [Types.Flip] {
-    let size = flipHistory.size();
-    let validStart = Nat.max(0, start);
-    let validEnd = Nat.min(size, end); // Ensure validEnd is within bounds
-
-    var flips : [Types.Flip] = [];
-
-    for (i in Iter.range(validStart, validEnd - 1)) {
-      let flipOpt = flipHistory.get(i);
-      flips := Array.append(flips, [flipOpt]);
-    };
-
-    return flips;
-  };
-
-  // Return the account ID specific to this user's subaccount
-  public shared (msg) func getDepositAddress() : async Blob {
-    let accountIdentifier = Account.accountIdentifier(Principal.fromActor(this), Account.principalToSubaccount(msg.caller));
-    return accountIdentifier;
-  };
-
-  public shared (msg) func whoami() : async Principal {
-    return msg.caller;
-  };
-
   // Change to private
   public shared func getCoinTossResult() : async Types.CoinTossResult {
     let randomBlob = await Random.blob();
@@ -294,6 +252,18 @@ shared (msg) actor class FlipCoin() = this {
         Debug.print("Entropy used up: Coin toss failed. Retrying...");
         await getCoinTossResult();
       };
+    };
+  };
+
+  // Make owner only
+  // Develop only
+  public func getHouseStatistics() : async T.HouseStatistics {
+    let rewardsMultiplier = house.calculateRewardMultiplier(_totalHistoricalBets, _totalHistoricalWinnings);
+
+    return {
+      multiplier = Nat64.toNat(rewardsMultiplier);
+      historicalBets = _totalHistoricalBets;
+      historicalWinnings = _totalHistoricalWinnings;
     };
   };
 
@@ -359,91 +329,34 @@ shared (msg) actor class FlipCoin() = this {
     return #Ok(available.e8s);
   };
 
-  private func _calculateMaxBet(houseBalance : Nat) : Nat64 {
-    let maxBetFloat = Float.fromInt(houseBalance) * MAX_BET_RATIO;
-    Debug.print("[_calculateMaxBet]: Max bet is " # Float.toText(maxBetFloat));
-    return Nat64.fromNat(Int.abs(Float.toInt(maxBetFloat)));
-  };
-
-  // Calculate potential payout for a bet
-  private func _calculatePotentialPayout(betAmount : Nat64) : Nat {
-    Nat64.toNat(betAmount * _rewardMultiplier) / 100;
-  };
-
-  private func _calculateHouseEdge() : Float {
-    if (_totalHistoricalBets == 0) return 0;
-
-    let edge = (Float.fromInt(_totalHistoricalBets - _totalHistoricalWinnings) / Float.fromInt(_totalHistoricalBets)) * 100.0;
-    return edge;
-  };
-
-  public func getRewardsMultiplier() : async Nat64 {
-    return _rewardMultiplier;
-  };
-
-  // Make owner only
-  // Develop only
-  public func getHouseStatistics() : async T.HouseStatistics {
-    let rewardsMultiplier = _adjustRewardMultiplier();
-
-    return {
-      multiplier = Nat64.toNat(rewardsMultiplier);
-      historicalBets = _totalHistoricalBets;
-      historicalWinnings = _totalHistoricalWinnings;
-    };
-  };
-
-  private func _adjustRewardMultiplier() : Nat64 {
-    let currentEdge = _calculateHouseEdge();
-
-    if (currentEdge < TARGET_EDGE_MIN) {
-      let adjustment = Float.min(TARGET_EDGE_MIN - currentEdge, 5.0);
-      let newMultiplier = Float.max(Float.fromInt(Nat64.toNat(MIN_REWARD_MULTIPLIER)), Float.fromInt(Nat64.toNat(BASE_REWARD_MULTIPLIER)) - adjustment);
-
-      Debug.print("Adjusting reward multiplier down to " # Float.toText(newMultiplier));
-      return Nat64.fromNat(Int.abs(Float.toInt(newMultiplier)));
-    } else if (currentEdge > TARGET_EDGE_MAX) {
-      let adjustment = Float.min(currentEdge - TARGET_EDGE_MAX, 5.0);
-      let newMultiplier = Float.min(Float.fromInt(Nat64.toNat(MAX_REWARD_MULTIPLIER)), Float.fromInt(Nat64.toNat(BASE_REWARD_MULTIPLIER)) + adjustment);
-
-      Debug.print("Adjusting reward multiplier up to " # Float.toText(newMultiplier));
-      return Nat64.fromNat(Int.abs(Float.toInt(newMultiplier)));
-    } else {
-      Debug.print("Reward multiplier is within target range. No adjustment needed.");
-      return BASE_REWARD_MULTIPLIER;
-    };
-  };
-
   // TODO Return receipt instead of text message
   public shared (msg) func submitFlip(bidSide : Bool, bidAmount_e8s : Nat64) : async Text {
     let ledgerId = await getICPLedgerId();
+    let houseBalance = await getHouseBalance();
 
     // Ensure user has deposited funds
     if (not book.hasEnoughBalance(msg.caller, ledgerId, Nat64.toNat(bidAmount_e8s))) {
       return "Balance not enough. Please deposit funds to continue.";
     };
 
-    let houseBalance = await getHouseBalance();
-
     // Update reward multiplier based on house balance
-    _rewardMultiplier := _adjustRewardMultiplier();
+    _rewardMultiplier := house.calculateRewardMultiplier(_totalHistoricalBets, _totalHistoricalWinnings);
 
-    _totalHistoricalBets += Nat64.toNat(bidAmount_e8s);
-
-    // Calculate potential payout with updated reward multiplier
-    let potentialPayout = _calculateReward(bidAmount_e8s);
-
+    // First layer of house protection
     // Check if house has enough coverage
-    if (Float.fromInt(houseBalance) < Float.fromInt(Nat64.toNat(potentialPayout)) * MIN_HOUSE_COVERAGE_RATIO) {
+    if (not house.hasCoverage(houseBalance, bidAmount_e8s, _rewardMultiplier) == true) {
       return "House coverage ratio too low. Please try a smaller bet.";
     };
 
+    // Second layer of house protection
     // Check if bet exceeds max amount
-    let maxBet = _calculateMaxBet(houseBalance);
-    // Debug.print("[submitFlip] max bet return value:" # Nat.toText(maxBet));
+    let maxBet = house.calculateMaxBet(houseBalance);
     if (bidAmount_e8s > maxBet) {
       return "Bet exceeds max limit of " # Float.toText(Float.fromInt(Nat64.toNat(maxBet)) / 100000000) # "ICP";
     };
+
+    // Update historical bet amounts
+    _totalHistoricalBets += Nat64.toNat(bidAmount_e8s);
 
     // Heads is true, Tails is false
     let flipResult = await getCoinTossResult();
@@ -477,7 +390,7 @@ shared (msg) actor class FlipCoin() = this {
 
   private func _settleBetWin(user : Principal, bidAmount_e8s : Nat64) : async Bool {
     let ledgerId = await getICPLedgerId();
-    let totalReward = _calculateReward(bidAmount_e8s);
+    let totalReward = house.calculateReward(bidAmount_e8s, _rewardMultiplier);
 
     _totalHistoricalWinnings += Nat64.toNat(totalReward);
 
@@ -520,9 +433,6 @@ shared (msg) actor class FlipCoin() = this {
       };
     };
 
-  };
-  private func _calculateReward(bidAmount_e8s : Nat64) : Nat64 {
-    return (bidAmount_e8s * _rewardMultiplier) / 100;
   };
 
   private func _withdrawBid(to : Principal, reward_e8s : Nat64) : async Bool {
