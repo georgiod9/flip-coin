@@ -122,6 +122,7 @@ function App() {
         />
       )}
       <Header
+        walletIdentity={walletIdentity}
         refreshControl={[triggerRefresh, toggleRefresh]}
         setShowTopUpModal={setShowTopUpModal}
         accountBalance={walletBalance}
