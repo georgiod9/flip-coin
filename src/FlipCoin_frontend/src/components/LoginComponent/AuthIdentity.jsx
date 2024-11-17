@@ -1,5 +1,4 @@
-import { Container, Spinner } from "react-bootstrap";
-import walletButton from "../../assets/svg/connect_wallet.svg";
+import { Button, Container, Spinner } from "react-bootstrap";
 import { AuthClient, LocalStorage } from "@dfinity/auth-client";
 import { HttpAgent } from "@dfinity/agent";
 import { FlipCoin_backend, createActor } from "declarations/FlipCoin_backend";
@@ -9,12 +8,18 @@ import {
   setupIdentifiedIcpLedger,
 } from "../../scripts/icpLedger";
 import { e8sToIcp } from "../../scripts/e8s";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { config } from "../../config/config";
+import "./AuthIdentity.css";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import { TooltipComponent } from "../Tooltip/Tooltip";
+import { TopUpComponent } from "../TopUp/TopUp";
+import { WalletComponent } from "../WalletComponent/WalletComponent";
 
 let actor = FlipCoin_backend;
 
 function AuthIdentity({
+  walletIdentity,
   isWalletConnected,
   setWalletIdentity,
   setIdentifiedIcpLedgerActor,
@@ -25,9 +30,11 @@ function AuthIdentity({
   accountBalance,
   accountCredit,
 }) {
-  const walletButtonStyle = {
-    width: "clamp(200px,15vw,450px)",
-  };
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [tooltipMessage, setTooltipMessage] = useState("Copy to clipboard");
+
   const connectWalletTextStyle = {
     whiteSpace: "nowrap",
     fontSize: "clamp(16px,1.5vw,24px)",
@@ -35,11 +42,6 @@ function AuthIdentity({
     padding: "0",
   };
 
-  const balanceTextStyle = {
-    whiteSpace: "nowrap",
-    fontSize: "clamp(12px,1.5vw,20px)",
-    margin: "0",
-  };
   const connectWallet = async () => {
     console.log(`Connecting wallet...`);
 
@@ -110,6 +112,38 @@ function AuthIdentity({
     setIdentifiedIcpLedgerActor(null);
   };
 
+  const toggleModal = () => {
+    setIsModalOpen(!isModalOpen);
+    console.log(`Modal is ${isModalOpen ? "open" : "closed"}`);
+  };
+
+  const copyToClipboard = (e, text) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigator.clipboard.writeText(text);
+    setTooltipMessage("Copied!"); // Change message when copied
+
+    // Optional: Reset message after a delay
+    setTimeout(() => {
+      setTooltipMessage("Copy to clipboard");
+    }, 1500); // Reset after 1.5 seconds
+  };
+
+  const handleCopyIconHover = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setTooltipPosition({
+      x: rect.left, // Position relative to the left edge of the viewport
+      y: rect.bottom + 5, // 5px below the bottom of the icon
+    });
+    setShowTooltip(true);
+    console.log("Tooltip position:", rect.left, rect.bottom); // Debug log
+  };
+
+  const handleTopUp = async (amount) => {
+    console.log(`Topping up with ${amount} ICP`);
+    // Add your top-up logic here
+  };
+
   useEffect(() => {
     const checkAuth = async () => {
       let authClient = await AuthClient.create();
@@ -156,51 +190,76 @@ function AuthIdentity({
   return (
     <Container style={{ cursor: "pointer" }}>
       {isWalletConnected ? (
-        <div style={{ position: "relative" }}>
-          <img
-            className="wallet-button-sizing"
-            // style={walletButtonStyle}
-            src={walletButton}
-          ></img>
-          <div
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "35%",
-              transform: "translate(-50%,-50%)",
-            }}
-          >
-            {accountBalance !== null && isWalletConnected ? (
-              <Container className="d-flex flex-column justify-content-center align-items-start">
-                <p style={balanceTextStyle}>
-                  {e8sToIcp(accountBalance).toString()} $ICP
-                </p>
-                {/* <p style={balanceTextStyle}>
-                  Fees: {e8sToIcp(accountCredit).toString()} ICP
-                </p> */}
-              </Container>
-            ) : (
-              <Spinner />
-            )}
-          </div>
+        <div style={{ position: "relative" }} onClick={toggleModal}>
+          <WalletComponent isModalOpen={isModalOpen}>
+            <div className="wallet-content">
+              {accountBalance !== null && isWalletConnected ? (
+                <Container className="d-flex align-items-center balance-container">
+                  <p className="balance-text">
+                    {e8sToIcp(accountBalance).toString()} ICP
+                  </p>
+                </Container>
+              ) : (
+                <Spinner />
+              )}
+              {isModalOpen && (
+                <div className="expanded-content">
+                  <div className="principal-container">
+                    <p>{walletIdentity.getPrincipal().toString()}</p>
+                    <div
+                      onMouseEnter={(e) => {
+                        console.log(`Mouse entered`);
+                        handleCopyIconHover(e);
+                      }}
+                      onMouseLeave={() => {
+                        console.log(`Mouse left`);
+                        setShowTooltip(false);
+                      }}
+                    >
+                      <ContentCopyIcon
+                        className="copy-icon"
+                        onClick={(e) =>
+                          copyToClipboard(
+                            e,
+                            walletIdentity.getPrincipal().toString()
+                          )
+                        }
+                      ></ContentCopyIcon>
+                      {showTooltip && (
+                        <TooltipComponent
+                          x={tooltipPosition.x}
+                          y={tooltipPosition.y}
+                        >
+                          {tooltipMessage}
+                        </TooltipComponent>
+                      )}
+                    </div>
+                  </div>
+
+                  <TopUpComponent onTopUp={handleTopUp} />
+
+                  <Button
+                    variant="outline-light"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      logout();
+                    }}
+                  >
+                    Logout
+                  </Button>
+                </div>
+              )}
+            </div>
+          </WalletComponent>
         </div>
       ) : (
         <div onClick={connectWallet} style={{ position: "relative" }}>
-          <img
-            className="wallet-button-sizing"
-            // style={walletButtonStyle}
-            src={walletButton}
-          ></img>
-          <div
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "40%",
-              transform: "translate(-50%,-50%)",
-            }}
-          >
-            <p style={connectWalletTextStyle}>Connect</p>
-          </div>
+          <WalletComponent isModalOpen={false}>
+            <div className="wallet-content">
+              <p className="connect-text">Connect</p>
+            </div>
+          </WalletComponent>
         </div>
       )}
     </Container>

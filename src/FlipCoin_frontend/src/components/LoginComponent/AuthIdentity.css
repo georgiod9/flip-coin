@@ -1,0 +1,132 @@
+.wallet-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.wallet-content .connect-text {
+  justify-content: center;
+}
+
+.balance-container {
+  position: relative;
+  margin-bottom: 0;
+  padding: 0 45px 0 15px !important;
+  height: auto;
+  transition: all 0.3s ease;
+}
+
+/* Add this new class for collapsed state */
+.wallet-button:not(.expanded) .balance-container {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.balance-text {
+  margin: 0;
+  font-size: 0.8em;
+  white-space: nowrap;
+}
+
+.expanded-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 2px;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Add styling for additional content that appears when expanded */
+.wallet-content .expanded-content {
+  margin-top: 2px; /* Space between top content and expanded content */
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 3px; /* Adds consistent spacing between elements */
+}
+
+/* Style for buttons in expanded content */
+.expanded-content .btn-outline-light {
+  width: 100%;
+  margin: 5px 0;
+  font-size: 0.8em;
+  border-radius: 6px;
+  padding: 5px 0;
+  height: 30px;
+  line-height: 1;
+}
+
+.expanded-content .btn-outline-light:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.expanded-content p {
+  color: rgba(255, 255, 255, 0.7); /* Slightly transparent white */
+  font-size: 0.65em;
+  margin: 0 0 10px 0;
+  padding: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  text-align: left;
+}
+
+/* Add container for principal ID and copy icon */
+.principal-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0px 0;
+  margin-top: 0px;
+}
+
+.principal-container p {
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.65em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.connect-text {
+  white-space: nowrap;
+  font-size: clamp(12px, 1.5vw, 24px);
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  text-align: center;
+  padding-right: 60px !important; /* Compensate for wallet icon space */
+}
+
+.copy-icon {
+  cursor: pointer;
+  font-size: 16px !important;
+  color: rgba(255, 255, 255, 0.7);
+  transition: color 0.2s ease;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.copy-icon-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.copy-icon:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
