@@ -1,4 +1,4 @@
-import { FlipCoin_backend } from "declarations/FlipCoin_backend";
+import { FlipCoin_backend } from "../../../declarations/FlipCoin_backend";
 
 
 export const getLedgerCanisterPrincipal = async () => {
@@ -10,7 +10,7 @@ export const getLedgerCanisterPrincipal = async () => {
     }
 }
 
-export const getUserDepositAddress = async (identifiedActor) => {
+export const getUserDepositAddress = async (identifiedActor: any) => {
     try {
 
         if (!identifiedActor) {
