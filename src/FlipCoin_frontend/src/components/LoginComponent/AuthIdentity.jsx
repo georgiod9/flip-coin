@@ -13,8 +13,10 @@ import { config } from "../../config/config";
 import "./AuthIdentity.css";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { TooltipComponent } from "../Tooltip/Tooltip";
-import { TopUpComponent } from "../TopUp/TopUp";
+import { TransactionInput } from "../TransactionInput/TransactionInput";
 import { WalletComponent } from "../WalletComponent/WalletComponent";
+import { transferTokens } from "../../scripts/topUp";
+import { withdrawRewards } from "../../scripts/RewardWithdrawal";
 
 let actor = FlipCoin_backend;
 
@@ -29,6 +31,10 @@ function AuthIdentity({
   setBackendActor,
   accountBalance,
   accountCredit,
+  identifiedActor,
+  identifiedIcpLedgerActor,
+  callToaster,
+  toggleRefresh,
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
@@ -123,25 +129,75 @@ function AuthIdentity({
     navigator.clipboard.writeText(text);
     setTooltipMessage("Copied!"); // Change message when copied
 
-    // Optional: Reset message after a delay
+    // Reset message after a delay
     setTimeout(() => {
       setTooltipMessage("Copy to clipboard");
     }, 1500); // Reset after 1.5 seconds
   };
 
-  const handleCopyIconHover = (e) => {
+  const setTooltipCoordinates = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     setTooltipPosition({
       x: rect.left, // Position relative to the left edge of the viewport
       y: rect.bottom + 5, // 5px below the bottom of the icon
     });
+  };
+
+  const handleCopyIconHover = (e) => {
+    setTooltipMessage("Copy to clipboard");
+    setTooltipCoordinates(e);
+
     setShowTooltip(true);
     console.log("Tooltip position:", rect.left, rect.bottom); // Debug log
   };
 
+  const handleOnchainBalanceHover = (e) => {
+    setTooltipMessage("This is the amount of ICP in your wallet.");
+
+    setTooltipCoordinates(e);
+
+    setShowTooltip(true);
+  };
+
   const handleTopUp = async (amount) => {
     console.log(`Topping up with ${amount} ICP`);
-    // Add your top-up logic here
+    callToaster(
+      true,
+      `Depositing ICP`,
+      `Please wait while deposit completes.`,
+      1500
+    );
+    const response = await transferTokens(
+      amount,
+      identifiedActor,
+      identifiedIcpLedgerActor
+    );
+    if (!response?.success) {
+      callToaster(false, `Deposit Failed`, response.error, 1500);
+    } else {
+      callToaster(true, `Deposit Success`, `Deposited ${amount} ICP.`, 1500);
+    }
+    toggleRefresh();
+    return;
+  };
+
+  const handleWithdraw = async (amount) => {
+    console.log(`Withdrawing ${amount} ICP`);
+    callToaster(
+      true,
+      `Withdrawing ICP`,
+      `Please wait while withdrawal completes.`,
+      1500
+    );
+    const response = await withdrawRewards(amount, identifiedActor);
+
+    if (!response?.success) {
+      callToaster(false, `Withdrawal Failed`, response.error, 1500);
+    } else {
+      callToaster(true, `Withdrawal Success`, `Withdrew ${amount} ICP.`, 1500);
+    }
+    toggleRefresh();
+    return;
   };
 
   useEffect(() => {
@@ -193,10 +249,10 @@ function AuthIdentity({
         <div style={{ position: "relative" }} onClick={toggleModal}>
           <WalletComponent isModalOpen={isModalOpen}>
             <div className="wallet-content">
-              {accountBalance !== null && isWalletConnected ? (
+              {accountCredit !== null && isWalletConnected ? (
                 <Container className="d-flex align-items-center balance-container">
                   <p className="balance-text">
-                    {e8sToIcp(accountBalance).toString()} ICP
+                    {e8sToIcp(accountCredit).toString()} ICP
                   </p>
                 </Container>
               ) : (
@@ -207,14 +263,8 @@ function AuthIdentity({
                   <div className="principal-container">
                     <p>{walletIdentity.getPrincipal().toString()}</p>
                     <div
-                      onMouseEnter={(e) => {
-                        console.log(`Mouse entered`);
-                        handleCopyIconHover(e);
-                      }}
-                      onMouseLeave={() => {
-                        console.log(`Mouse left`);
-                        setShowTooltip(false);
-                      }}
+                      onMouseEnter={(e) => handleCopyIconHover(e)}
+                      onMouseLeave={() => setShowTooltip(false)}
                     >
                       <ContentCopyIcon
                         className="copy-icon"
@@ -236,7 +286,21 @@ function AuthIdentity({
                     </div>
                   </div>
 
-                  <TopUpComponent onTopUp={handleTopUp} />
+                  <div
+                    onMouseEnter={(e) => handleOnchainBalanceHover(e)}
+                    onMouseLeave={() => setShowTooltip(false)}
+                  >
+                    <p className="balance-info">{`on-chain: ${e8sToIcp(
+                      accountBalance
+                    )} ICP`}</p>
+                  </div>
+                  <TransactionInput onTopUp={handleTopUp} buttonText="Top Up" />
+                  <TransactionInput
+                    onTopUp={handleWithdraw}
+                    buttonText="Withdraw"
+                    maxAmount={e8sToIcp(accountCredit)}
+                    isWithdraw={true}
+                  />
 
                   <Button
                     variant="outline-light"
