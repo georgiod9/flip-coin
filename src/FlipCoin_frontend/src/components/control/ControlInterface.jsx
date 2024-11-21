@@ -216,25 +216,20 @@ function ControlInterface({
 
     // let bidAmountIcp = bidAmount * 10 ** 8;
 
-    callToaster(
-      true,
-      `Depositing ICP`,
-      `Please wait while deposit completes.`,
-      1500
-    );
+    // callToaster(
+    //   true,
+    //   `Depositing ICP`,
+    //   `Please wait while deposit completes.`,
+    //   1500
+    // );
 
-    const isTopped = await topUp(bidAmount);
-    if (!isTopped) {
-      callToaster(false, `Flip Failed`, `ICP deposit failed.`, 1500);
-      return;
-    }
+    // const isTopped = await topUp(bidAmount);
+    // if (!isTopped) {
+    //   callToaster(false, `Flip Failed`, `ICP deposit failed.`, 1500);
+    //   return;
+    // }
 
-    callToaster(
-      true,
-      `Flipping coin`,
-      `Deposit success. Please wait for result.`,
-      2500
-    );
+    callToaster(true, `Flipping coin`, `Please wait for result.`, 2500);
 
     console.log(`Flipping coin...`);
     const bidSide = selectedSide === 1 ? true : false;
@@ -243,6 +238,8 @@ function ControlInterface({
 
     toggleRefresh();
     console.log(`calling toaster`);
+
+    // TODO: Calculate reward based on actual multiplier from canister
     callToaster(
       result.includes("Congratulations") ? true : false,
       result.includes("Congratulations")
