@@ -18,6 +18,8 @@ function Header({
   setShowTopUpModal,
   accountBalance,
   accountCredit,
+  identifiedActor,
+  identifiedIcpLedgerActor,
   isWalletConnected,
   flipCoinCanisterBalance,
   setWalletIdentity,
@@ -26,6 +28,8 @@ function Header({
   setIdentifiedActor,
   setLedgerCanisterPrincipal,
   setBackendActor,
+  callToaster,
+  toggleRefresh,
 }) {
   const [isMobileWidth, setMobileWidth] = useState(false);
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
@@ -172,6 +176,10 @@ function Header({
           setBackendActor={setBackendActor}
           accountBalance={accountBalance}
           accountCredit={accountCredit}
+          identifiedActor={identifiedActor}
+          identifiedIcpLedgerActor={identifiedIcpLedgerActor}
+          callToaster={callToaster}
+          toggleRefresh={toggleRefresh}
         />
       </div>
     </div>

@@ -1,14 +1,10 @@
 import { useEffect, useState } from "react";
-import { FlipCoin_backend, createActor } from "declarations/FlipCoin_backend";
-// import { icp_ledger_canister } from "declarations/icp_ledger_canister";
+import { FlipCoin_backend } from "declarations/FlipCoin_backend";
 import Header from "./components/header/header";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ControlInterface from "./components/control/ControlInterface";
 import Spacer from "./components/Spacer";
 import Toaster from "./components/Toast/Toaster";
-// import { AuthClient } from "@dfinity/auth-client";
-import { HttpAgent, Actor } from "@dfinity/agent";
-import { TopUpComponent } from "./components/TopUp/TopUpComponent";
 import {
   getFlipCoinCanisterBalance,
   getFlipCoinCredits,
@@ -29,7 +25,7 @@ function App() {
     useState(null);
   const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [walletBalance, setWalletBalance] = useState(null);
-  const [accountCredit, setAccountCredit] = useState(0);
+  const [accountCredit, setAccountCredit] = useState(null);
   const [isIdentified, setIsIdentified] = useState(false);
 
   const [flipCoinCanisterBalance, setFlipCoinCanisterBalance] = useState(0);
@@ -127,6 +123,8 @@ function App() {
         setShowTopUpModal={setShowTopUpModal}
         accountBalance={walletBalance}
         accountCredit={accountCredit}
+        identifiedActor={identifiedActor}
+        identifiedIcpLedgerActor={identifiedIcpLedgerActor}
         isWalletConnected={isIdentified}
         flipCoinCanisterBalance={flipCoinCanisterBalance}
         setWalletIdentity={setWalletIdentity}
@@ -135,6 +133,8 @@ function App() {
         setIdentifiedActor={setIdentifiedActor}
         setLedgerCanisterPrincipal={setLedgerCanisterPrincipal}
         setBackendActor={setBackendActor}
+        callToaster={callToaster}
+        toggleRefresh={toggleRefresh}
       />
       <Spacer space={"15"} unit={"vh"} />
       {showToaster && (
