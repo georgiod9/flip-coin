@@ -62,4 +62,19 @@ module {
         amount : Nat64; // Amount in e8s
         memo : Nat64;
     };
+
+    public type WithdrawError = {
+        #InsufficientBalance;
+        #TransferFailure : Text;
+        #SystemError : Text;
+    };
+
+    public type WithdrawReceipt = {
+        #Ok : {
+            blockIndex : Nat64;
+            amount : Nat;
+        };
+        #Err : WithdrawError;
+    };
+
 };
