@@ -7,11 +7,11 @@
 }
 
 .top-up-input {
-  flex: 0.7 !important; /* Takes up 40% of the space */
+  flex: 0.7 !important; /* Takes up 70% of the space */
   background: rgba(255, 255, 255, 0.1) !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
   color: white !important;
-  font-size: 0.8em !important;
+  font-size: 0.65em !important;
   height: 30px !important;
   border-radius: 6px !important;
   padding: 5px 10px !important;
@@ -19,11 +19,11 @@
 }
 
 .top-up-button {
-  flex: 0.3 !important;
+  flex: 0.3 !important; /* Takes up 30% of the space */
   max-width: 100px !important;
   font-size: 0.6em !important;
   height: 30px !important;
-  padding: 0 5px !important; /* Remove vertical padding */
+  padding: 0 5px !important;
   white-space: nowrap !important;
   border-radius: 6px !important;
   margin: 0 !important;
@@ -35,6 +35,7 @@
 
 .top-up-input::placeholder {
   color: rgba(255, 255, 255, 0.5) !important;
+  font-size: 0.7em !important;
 }
 
 .top-up-input:focus {
@@ -53,4 +54,20 @@
 
 .top-up-input[type="number"] {
   -moz-appearance: textfield;
+}
+
+.max-button {
+  flex: 0.2 !important; /* Takes up 20% of the space */
+  max-width: 60px !important;
+  border-left: none;
+  border-right: none;
+  padding: 0 0.5rem;
+  font-size: 0.8rem;
+  background-color: transparent;
+  color: #fff;
+  border-radius: 6px !important;
+}
+
+.max-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
