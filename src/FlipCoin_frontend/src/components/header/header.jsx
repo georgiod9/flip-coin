@@ -13,10 +13,13 @@ import AuthIdentity from "../LoginComponent/AuthIdentity";
 import { FlipHistory } from "../FlipHistory/FlipHistory";
 
 function Header({
+  walletIdentity,
   refreshControl,
   setShowTopUpModal,
   accountBalance,
   accountCredit,
+  identifiedActor,
+  identifiedIcpLedgerActor,
   isWalletConnected,
   flipCoinCanisterBalance,
   setWalletIdentity,
@@ -25,6 +28,8 @@ function Header({
   setIdentifiedActor,
   setLedgerCanisterPrincipal,
   setBackendActor,
+  callToaster,
+  toggleRefresh,
 }) {
   const [isMobileWidth, setMobileWidth] = useState(false);
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
@@ -155,50 +160,13 @@ function Header({
         </div>
       </div>
 
-      <div
-        className="header-center-coins-container-pos"
-        style={
-          {
-            // border: "1px solid red",
-            // position: "absolute",
-            // top: "50%",
-            // left: "50%",
-            // transform: "translate(-50%,-40%)",
-          }
-        }
-      >
+      <div className="header-center-coins-container-pos">
         <FlipHistory flipHistory={flipHistory} statistics={stats} />
       </div>
 
-      <div
-        className=""
-        style={
-          {
-            // position: "absolute",
-            // top: "50%",
-            // left: "10%",
-            // transform: "translate(-50%, 0%)",
-          }
-        }
-      >
-        {/* <div> */}
-        <p>Heads: {stats.headsCount}</p>
-        <p>Tails: {stats.tailsCount}</p>
-        {/* </div> */}
-      </div>
-
-      <div
-        className="header-item-3-pos"
-        style={
-          {
-            // position: "absolute",
-            // top: "50%",
-            // right: "0%",
-            // transform: "translate(0%,10%)",
-          }
-        }
-      >
+      <div className="header-item-3-pos">
         <AuthIdentity
+          walletIdentity={walletIdentity}
           isWalletConnected={isWalletConnected}
           setWalletIdentity={setWalletIdentity}
           setIdentifiedIcpLedgerActor={setIdentifiedIcpLedgerActor}
@@ -208,6 +176,10 @@ function Header({
           setBackendActor={setBackendActor}
           accountBalance={accountBalance}
           accountCredit={accountCredit}
+          identifiedActor={identifiedActor}
+          identifiedIcpLedgerActor={identifiedIcpLedgerActor}
+          callToaster={callToaster}
+          toggleRefresh={toggleRefresh}
         />
       </div>
     </div>

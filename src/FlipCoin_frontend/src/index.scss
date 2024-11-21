@@ -74,6 +74,7 @@ button[type="submit"] {
 
 
 .header-main-div {
+  padding-top: 10px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -81,10 +82,11 @@ button[type="submit"] {
 }
 
 .header-center-coins-container-pos {
+  margin-top: 40px;
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%,-40%);
+  transform: translate(-50%,-50%);
 }
 .coins-wrapper {
   width: 100%;

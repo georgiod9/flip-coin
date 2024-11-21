@@ -399,10 +399,11 @@ shared (msg) actor class FlipCoin() = this {
     Debug.print("Settling win. House balance: " # Nat.toText(houseBalance));
     if (houseBalance >= Nat64.toNat(totalReward)) {
       let _userBalance = _addCredit(user, ledgerId, Nat64.toNat(totalReward));
-
+      let _canisterBalance = _removeCredit(Principal.fromActor(this), ledgerId, Nat64.toNat(totalReward));
       let debug_available_to_withdraw = book.fetchUserIcpBalance(user, icp_ledger_id);
       Debug.print("Available rewards for withdrawal: " # Nat.toText(debug_available_to_withdraw));
-      let _isTransferred = await _withdrawBid(user, totalReward);
+      // let _isTransferred = await _withdrawBid(user, totalReward);
+      return true;
     } else {
       return false;
     };
@@ -435,36 +436,46 @@ shared (msg) actor class FlipCoin() = this {
 
   };
 
-  private func _withdrawBid(to : Principal, reward_e8s : Nat64) : async Bool {
+  public shared (msg) func withdrawRewards(amount : Nat) : async Types.WithdrawReceipt {
+    return await _withdrawBid(msg.caller, amount);
+  };
+
+  private func _withdrawBid(to : Principal, withdrawAmount : Nat) : async Types.WithdrawReceipt {
     try {
       let amount = book.fetchUserIcpBalance(to, icp_ledger_id);
 
+      if (withdrawAmount > amount) {
+        return #Err(#InsufficientBalance);
+      };
+
       let transferResult = await transfer({
-        amount = { e8s = Nat64.fromNat(amount) };
+        amount = { e8s = Nat64.fromNat(withdrawAmount) };
         toPrincipal = to;
         toSubaccount = null;
       });
 
       switch (transferResult) {
         case (#ok(blockIndex)) {
-          let _userBalance = _removeCredit(to, icp_ledger_id, amount);
-          let _canisterBalance = _removeCredit(Principal.fromActor(this), icp_ledger_id, Nat64.toNat(reward_e8s)); // remove reward from canister
+          let _userBalance = _removeCredit(to, icp_ledger_id, withdrawAmount);
 
           // If the transfer was successful, return true
-          Debug.print("Reward transfer: " # Nat64.toText(Nat64.fromNat(amount) / 100000000) # " to principal: " # Principal.toText(to) # ".");
-          Debug.print("Remaining balance in book for " # Principal.toText(to) # Nat.toText(amount / 100000000));
-          return true;
+          Debug.print("Reward transfer: " # Nat64.toText(Nat64.fromNat(withdrawAmount) / 100000000) # " to principal: " # Principal.toText(to) # ".");
+          Debug.print("Remaining balance in book for " # Principal.toText(to) # Nat.toText(withdrawAmount / 100000000));
+          return #Ok({
+            blockIndex = blockIndex;
+            amount = withdrawAmount;
+          });
         };
         case (#err(errorMessage)) {
           // If there was an error, log it and return false
           Debug.print("Error during transfer: " # errorMessage);
-          return false;
+          return #Err(#TransferFailure(errorMessage));
         };
       };
 
     } catch (error : Error) {
       // catch any errors that might occur during the transfer
-      return false;
+      return #Err(#SystemError(Error.message(error)));
     };
   };
 
@@ -567,43 +578,6 @@ shared (msg) actor class FlipCoin() = this {
       // catch any errors that might occur during the transfer
       return #err("Reject message: " # Error.message(error));
     };
-  };
-
-  // Transfer user reward
-  private func withdrawReward(bidAmount_e8s : Nat64, to : Principal) : async Bool {
-
-    try {
-      let reward = bidAmount_e8s + (bidAmount_e8s * 95) / 100;
-
-      let transferResult = await transfer({
-        amount = { e8s = reward };
-        toPrincipal = to;
-        toSubaccount = null;
-      });
-
-      switch (transferResult) {
-        case (#ok(_blockIndex)) {
-          // If the transfer was successful, return true
-          Debug.print("Reward transfer: " # Nat64.toText(reward) # " to principal: " # Principal.toText(to) # ".");
-
-          let ledgerId = await getICPLedgerId();
-          // Update user balance records
-          let _newBalance = _removeCredit(to, ledgerId, Nat64.toNat(bidAmount_e8s));
-          return true;
-        };
-        case (#err(errorMessage)) {
-          // If there was an error, log it and return false
-          Debug.print("Error during transfer: " # errorMessage);
-          return false;
-        };
-      };
-
-    } catch (_error : Error) {
-      // catch any errors that might occur during the transfer
-      return false;
-    };
-
-    return true;
   };
 
 };

@@ -45,6 +45,7 @@ export default function Toaster({
         top: "10%",
         backgroundColor: backgroundColor,
         zIndex: 200000,
+        boxShadow: "0 6px 16px rgba(0, 0, 0, 0.4)",
       }}
       // onClose={() => { onHide(); }}
       onClose={handleClose}
