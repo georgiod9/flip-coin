@@ -106,17 +106,6 @@ function App() {
 
   return (
     <div className="main-background">
-      {showTopUpModal && (
-        <TopUpComponent
-          refreshControl={[triggerRefresh, toggleRefresh]}
-          showControl={[showTopUpModal, setShowTopUpModal]}
-          accountBalance={walletBalance}
-          accountCredit={accountCredit}
-          ledgerPrincipal={ledgerCanisterPrincipal}
-          identifiedActor={identifiedActor}
-          identifiedIcpActor={identifiedIcpLedgerActor}
-        />
-      )}
       <Header
         walletIdentity={walletIdentity}
         refreshControl={[triggerRefresh, toggleRefresh]}
