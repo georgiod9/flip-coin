@@ -65,7 +65,7 @@
 
 /* When modal is open */
 .wallet-button.expanded {
-  height: clamp(180px, 18vh, 220px);
+  height: clamp(240px, 18vh, 350px);
 }
 
 /* Animation for expanded content */
