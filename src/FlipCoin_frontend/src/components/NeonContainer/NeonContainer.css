@@ -1,0 +1,109 @@
+.neon-container {
+  position: relative;
+  width: 100%;
+  padding: 1rem;
+  border-radius: 50px; /* Fixed larger border radius */
+  background: linear-gradient(180deg, #000000 0%, #0000df 100%);
+  box-shadow: 0 0 15px rgba(0, 0, 223, 0.8);
+}
+/* Create the neon border effect */
+.neon-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50px; /* Match container radius */
+  padding: 4px;
+  background: #0000df;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Add the white inner border */
+.neon-container::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  border-radius: 48px; /* Slightly smaller to nest properly */
+  padding: 1px;
+  background: white;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  box-shadow: 0 0 10px rgba(0, 246, 255, 0.4);
+}
+
+.neon-container-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Wide variant for flip history */
+.neon-container-wide {
+  padding: 1rem 1.5rem;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.neon-container-wide .neon-container-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+/* House balance container */
+.neon-container-house {
+  /* width: auto; */
+  width: clamp(200px, 20vw, 300px);
+  min-width: 180px;
+  height: 55px;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .neon-container-wide {
+    padding: 0.75rem 1rem;
+    min-height: 70px;
+  }
+
+  .neon-container-house {
+    min-width: 160px;
+    height: 50px;
+  }
+}
+
+@media (max-width: 480px) {
+  .neon-container {
+    border-radius: 25px;
+  }
+
+  .neon-container::before {
+    border-radius: 25px;
+  }
+
+  .neon-container-wide {
+    padding: 0.5rem 0.75rem;
+    min-height: 60px;
+  }
+
+  .neon-container-house {
+    min-width: 140px;
+    height: 45px;
+    padding: 0 0.75rem;
+  }
+}
