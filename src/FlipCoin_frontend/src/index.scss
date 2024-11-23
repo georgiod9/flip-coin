@@ -79,6 +79,10 @@ button[type="submit"] {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .header-center-coins-container-pos {
@@ -115,6 +119,10 @@ button[type="submit"] {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
   }
   .header-center-coins-container-pos {
     position: absolute;

@@ -2,6 +2,10 @@
   position: relative;
   /* Match the non-expanded height */
   height: clamp(60px, 8vh, 100px);
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .wallet-button {
@@ -65,7 +69,7 @@
 
 /* When modal is open */
 .wallet-button.expanded {
-  height: clamp(240px, 18vh, 350px);
+  height: clamp(280px, 18vh, 380px);
 }
 
 /* Animation for expanded content */
