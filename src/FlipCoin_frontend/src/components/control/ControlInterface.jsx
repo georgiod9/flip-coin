@@ -1,16 +1,10 @@
-import { useEffect, useState } from "react";
-import { Button, Card, Col, Container, Row, Spinner } from "react-bootstrap";
-import { FlipCoin_backend } from "declarations/FlipCoin_backend";
-import Spacer from "../Spacer";
-// import coinIcon from "../../assets/coin.png";
-import coinIcon from "../../assets/svg/coin.svg";
+import { useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
 import "./flip.css";
-import { depositTokens } from "../../scripts/topUp";
-import { e8sToIcp, icpToE8s } from "../../scripts/e8s";
-import { getUserDepositAddress } from "../../scripts/getPrincipal";
-import { retrieveTransferFee } from "../../scripts/fee";
+import { icpToE8s } from "../../scripts/e8s";
 import SelectButton from "../Select-button/SelectButton";
 import BetSizeSelector from "../BetSizeSelector/BetSizeSelector";
+import "./ControlInterface.css";
 
 function ControlInterface({
   isIdentified,
@@ -46,57 +40,9 @@ function ControlInterface({
     padding: "10px 10px",
   };
 
-  const betButtonsColumnStyle = {
-    padding: "3px 3px",
-  };
-
-  const buttonStyle = {
-    backgroundColor: "#F26430",
-    border: "1px solid #F26430",
-    borderRadius: "5px",
-    width: "100%",
-    height: "40px",
-    opacity: "1",
-    padding: "0",
-  };
-
-  const headsButtonStyle = {
-    width: "100%",
-    height: "60px",
-    borderRadius: "5px",
-    backgroundColor: "#6761A8",
-    border: "1px solid #6761A8",
-    whiteSpace: "nowrap",
-  };
-
-  const tailsButtonStyle = {
-    width: "100%",
-    height: "60px",
-    borderRadius: "5px",
-    backgroundColor: "#009B72",
-    border: "1px solid #009B72",
-    padding: "1px 1px",
-    whiteSpace: "nowrap",
-  };
-
-  const flipButtonStyle = {
-    backgroundColor: "#009DDC",
-    border: "1px solid #009DDC",
-    borderRadius: "5px",
-    width: "100%",
-    height: "40px",
-  };
-
-  const coinIconStyle = {
-    width: "30%",
-    height: "30%",
-  };
-
-  const betAmounts = [0.1, 0.5, 1, 1.5, 2, 5];
-
   const handleChooseSide = (side) => {
     if (!isIdentified) {
-      callToaster(false, `Failed`, `Please connect your wallet`, 2000);
+      callToaster(false, `Failed`, `Please connect your wallet`, "", 2000);
       return;
     }
 
@@ -106,96 +52,18 @@ function ControlInterface({
       setSelectedSide(0);
     }
 
-    callToaster(true, `Side Chosen`, `You chose ${side.toUpperCase()}`, 2000);
-  };
-
-  const handleChooseBetSize = (amount) => {
-    setBidAmount(amount);
-    callToaster(true, `Bid Placed`, `You're bidding ${amount} ICP.`, 2000);
-  };
-
-  const topUp = async (amount) => {
-    const amountInE8s = icpToE8s(
-      parseFloat(amount + e8sToIcp(retrieveTransferFee()))
+    callToaster(
+      true,
+      `Side Chosen`,
+      `You chose ${side.toUpperCase()}`,
+      "",
+      2000
     );
-
-    console.log(`Amount in e8s`, amountInE8s);
-    try {
-      // Retrieve deposit address
-      const userDepositAddress = await getUserDepositAddress(identifiedActor);
-
-      console.log(`userDepositAddress`, userDepositAddress);
-
-      const transferArgs = {
-        to: userDepositAddress,
-        from_subaccount: [],
-        created_at_time: [],
-        memo: BigInt(0x1),
-        amount: { e8s: BigInt(Number(amountInE8s) + retrieveTransferFee()) },
-        fee: { e8s: retrieveTransferFee() },
-      };
-      console.log(`transferArgs`, transferArgs);
-
-      const result = await identifiedIcpActor.transfer(transferArgs);
-      console.log("Transfer token result:", result);
-      console.log("Transfer token result.ok:", result.Ok);
-
-      const isDeposited = await triggerDepositTokens(bidAmount);
-      console.log(`Is Deposited`, isDeposited);
-      if (!isDeposited) {
-        console.error(`Failed to deposit tokens`);
-        callToaster(
-          false,
-          `Deposit Failed`,
-          `Failed to deposit ${e8sToIcp(amount)}.`,
-          1500
-        );
-
-        return false;
-      } else {
-        console.log(`call deposit success...$$$$$`);
-        callToaster(
-          true,
-          `Deposit Success`,
-          `Deposited ${e8sToIcp(amount)}.`,
-          1500
-        );
-      }
-      console.log(`Deposit complete.`);
-
-      // setShow(false);
-
-      // Refresh components
-      // toggleRefresh();
-      return true;
-    } catch (error) {
-      console.error("Error during transfer:", error);
-    }
-  };
-
-  const triggerDepositTokens = async (bidAmount) => {
-    try {
-      if (!identifiedActor) {
-        throw new Error("Backend actor not identified.");
-      }
-      const deposit = await depositTokens(identifiedActor);
-      console.log(`deposit:`, deposit);
-      console.log(`deposit.Ok:`, deposit.Ok);
-
-      if (deposit && deposit.Ok >= bidAmount) {
-        return true;
-      }
-
-      return false;
-    } catch (error) {
-      console.error(`Failed to deposit icp:`, error);
-      return null;
-    }
   };
 
   const handleSubmitFlip = async () => {
     if (!isIdentified) {
-      callToaster(false, `Failed`, `Please connect your wallet`, 2000);
+      callToaster(false, `Failed`, `Please connect your wallet`, "", 2000);
       return;
     }
 
@@ -214,30 +82,13 @@ function ControlInterface({
       return;
     }
 
-    // let bidAmountIcp = bidAmount * 10 ** 8;
+    callToaster(true, `Flipping coin`, `Please wait for result.`, "", 2500);
 
-    // callToaster(
-    //   true,
-    //   `Depositing ICP`,
-    //   `Please wait while deposit completes.`,
-    //   1500
-    // );
-
-    // const isTopped = await topUp(bidAmount);
-    // if (!isTopped) {
-    //   callToaster(false, `Flip Failed`, `ICP deposit failed.`, 1500);
-    //   return;
-    // }
-
-    callToaster(true, `Flipping coin`, `Please wait for result.`, 2500);
-
-    console.log(`Flipping coin...`);
     const bidSide = selectedSide === 1 ? true : false;
     const result = await backendActor.submitFlip(bidSide, icpToE8s(bidAmount));
     console.log(`result: `, result);
 
     toggleRefresh();
-    console.log(`calling toaster`);
 
     // TODO: Calculate reward based on actual multiplier from canister
     callToaster(
@@ -246,6 +97,7 @@ function ControlInterface({
         ? `You won ${bidAmount * 1.95} ICP`
         : `You lost.`,
       `${result}`,
+      "",
       6000
     );
 
@@ -257,7 +109,7 @@ function ControlInterface({
     <Container
       fluid
       style={containerBorder}
-      className="d-flex flex-column justify-content-between align-items-center row-gap-1"
+      className="d-flex flex-column justify-content-between align-items-center row-gap-1 control-interface-wrapper"
     >
       <BetSizeSelector
         isIdentified={isIdentified}
@@ -294,8 +146,6 @@ function ControlInterface({
           </Col>
         </Row>
       </Container>
-      {/* </Card.Body> */}
-      {/* </Card> */}
     </Container>
   );
 }

@@ -12,7 +12,7 @@ dfx deploy icp_ledger_canister --argument "(variant {
         record {
           \"$(dfx ledger --identity default account-id)\";
           record {
-            e8s = 10_000_000_000 : nat64;
+            e8s = 150_000_000_000 : nat64;
           };
         };
       };

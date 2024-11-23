@@ -15,6 +15,7 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { TooltipComponent } from "../Tooltip/Tooltip";
 import { TransactionInput } from "../TransactionInput/TransactionInput";
 import { WalletComponent } from "../WalletComponent/WalletComponent";
+import { TransferModal } from "../TransferModal/TransferModal";
 import { transferTokens } from "../../scripts/topUp";
 import { withdrawRewards } from "../../scripts/RewardWithdrawal";
 
@@ -40,6 +41,7 @@ function AuthIdentity({
   const [showTooltip, setShowTooltip] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [tooltipMessage, setTooltipMessage] = useState("Copy to clipboard");
+  const [showTransferModal, setShowTransferModal] = useState(false);
 
   const connectWalletTextStyle = {
     whiteSpace: "nowrap",
@@ -165,6 +167,7 @@ function AuthIdentity({
       true,
       `Depositing ICP`,
       `Please wait while deposit completes.`,
+      "",
       1500
     );
     const response = await transferTokens(
@@ -173,9 +176,15 @@ function AuthIdentity({
       identifiedIcpLedgerActor
     );
     if (!response?.success) {
-      callToaster(false, `Deposit Failed`, response.error, 1500);
+      callToaster(false, `Deposit Failed`, response.error, "", 1500);
     } else {
-      callToaster(true, `Deposit Success`, `Deposited ${amount} ICP.`, 1500);
+      callToaster(
+        true,
+        `Deposit Success`,
+        `Deposited ${amount} ICP.`,
+        "",
+        1500
+      );
     }
     toggleRefresh();
     return;
@@ -187,14 +196,21 @@ function AuthIdentity({
       true,
       `Withdrawing ICP`,
       `Please wait while withdrawal completes.`,
+      "",
       1500
     );
     const response = await withdrawRewards(amount, identifiedActor);
 
     if (!response?.success) {
-      callToaster(false, `Withdrawal Failed`, response.error, 1500);
+      callToaster(false, `Withdrawal Failed`, "", response.error, 1500);
     } else {
-      callToaster(true, `Withdrawal Success`, `Withdrew ${amount} ICP.`, 1500);
+      callToaster(
+        true,
+        `Withdrawal Success`,
+        `Withdrew ${amount} ICP.`,
+        "",
+        1500
+      );
     }
     toggleRefresh();
     return;
@@ -206,7 +222,7 @@ function AuthIdentity({
       if (authClient.isAuthenticated()) {
         console.log(`Identity already authorized. Rehydrating...`);
         const identity = authClient.getIdentity();
-
+        console.log(`Identity:`, identity.getPrincipal().toString());
         if (
           identity.getPrincipal().toString().includes(config.loggedOutPrincipal)
         ) {
@@ -307,6 +323,17 @@ function AuthIdentity({
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
+                      setShowTransferModal(true);
+                    }}
+                  >
+                    Cashout
+                  </Button>
+
+                  <Button
+                    variant="outline-light"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
                       logout();
                     }}
                   >
@@ -314,6 +341,16 @@ function AuthIdentity({
                   </Button>
                 </div>
               )}
+
+              <TransferModal
+                show={showTransferModal}
+                myPrincipal={walletIdentity.getPrincipal().toString()}
+                onHide={() => setShowTransferModal(false)}
+                identifiedIcpLedgerActor={identifiedIcpLedgerActor}
+                balance={accountBalance}
+                callToaster={callToaster}
+                toggleRefresh={toggleRefresh}
+              />
             </div>
           </WalletComponent>
         </div>
