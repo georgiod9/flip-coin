@@ -1,4 +1,3 @@
-
 @font-face {
   font-family: 'AcuminVariableConcept';
   src: url('./assets/fonts/AcuminVariableConcept.otf') format('opentype');
@@ -67,14 +66,18 @@ button[type="submit"] {
 .main-background {
   width: 100vw;
   height: 100vh;
+  min-height: 100vh;
   background-image: url(../src/assets/svg/Bg.svg);
   background-position: center center;
   background-size: cover;
+  background-repeat: no-repeat;
+  overflow-x: hidden;
+  position: relative;
 }
 
 
 .header-main-div {
-  padding-top: 10px;
+  padding-top: 10px 20px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -83,6 +86,8 @@ button[type="submit"] {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  width: 100%;
+  position: relative;
 }
 
 .header-center-coins-container-pos {
@@ -94,6 +99,17 @@ button[type="submit"] {
 }
 .coins-wrapper {
   width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.house-funds-container-sizing {
+  width: auto;
+  max-width: 20vw;
+}
+
+.wallet-button-sizing {
+  width: clamp(200px,15vw,450px);
 }
 
 .header-item-1-pos{
@@ -105,13 +121,9 @@ button[type="submit"] {
 .header-item-3-pos{
   order: 2;
 }
-.house-funds-container-sizing {
-  max-width: 20vw;
-}
 
-.wallet-button-sizing {
-  width: clamp(200px,15vw,450px);
-}
+
+
 
 @media(max-width: 628px) {
   .header-main-div {
@@ -185,5 +197,49 @@ button[type="submit"] {
   border-radius: 30px; /* Adjust for rounding */
   box-shadow: 0 0 15px 7px rgba(0, 47, 135, 0.75); /* Adjust color and size of glow */
   text-align: center; 
+}
+
+@media (max-width: 768px) {
+  .header-main-div {
+    flex-direction: column;
+    gap: 20px;
+    padding: 10px;
+  }
+
+  .header-center-coins-container-pos {
+    order: 2;
+    margin-top: 30px;
+    width: 90%;
+  }
+
+  .house-funds-container-sizing {
+    max-width: 45%;
+  }
+
+  .wallet-button-sizing {
+    max-width: 45%;
+  }
+
+  .header-item-1-pos,
+  .header-item-3-pos {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-main-div {
+    padding: 10px 5px;
+  }
+
+  .header-center-coins-container-pos {
+    width: 95%;
+  }
+
+  .house-funds-container-sizing,
+  .wallet-button-sizing {
+    max-width: 48%;
+  }
 }
 

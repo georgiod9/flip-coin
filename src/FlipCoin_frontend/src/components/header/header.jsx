@@ -11,6 +11,7 @@ import coinsContainerImg from "../../assets/svg/coin_history_container.svg";
 import "./header.css";
 import AuthIdentity from "../LoginComponent/AuthIdentity";
 import { FlipHistory } from "../FlipHistory/FlipHistory";
+import { NeonContainer } from "../NeonContainer/NeonContainer";
 
 function Header({
   walletIdentity,
@@ -44,16 +45,6 @@ function Header({
     headsCount: null,
   });
 
-  const houseFundsTextStyle = {
-    margin: "0px 0px",
-    whiteSpace: "nowrap",
-    fontSize: "clamp(16px,0.1vw,40px)",
-  };
-
-  const dollarIconstyle = {
-    width: "clamp(15px,1vw, 30px)",
-  };
-
   useEffect(() => {
     // console.log(`Account balance changed.`, accountBalance);
   }, [accountBalance]);
@@ -86,82 +77,57 @@ function Header({
   }, [refresh]);
 
   return (
-    <div
-      className="header-main-div"
-      style={{
-        position: "relative",
-        // border: "1px solid red",
-      }}
-    >
-      <div
-        className="header-item-1-pos"
-        style={
-          {
-            // position: "absolute",
-            // top: "50%",
-            // left: "10%",
-            // transform: "translate(-50%, 0%)",
-          }
-        }
-      >
-        <div style={{ position: "relative" }}>
-          <img
-            src={houseFundsContainer}
-            className="house-funds-container-sizing"
-            // style={{ maxWidth: "20vw" }}
-            alt="House Funds"
-          />
-          <div
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "15%",
-              transform: "translate(-50%,-50%)",
-            }}
-          >
-            <img style={dollarIconstyle} src={dollarIcon}></img>
+    <div className="header-main-div">
+      <div className="header-item-1-pos">
+        <NeonContainer variant="house">
+          <div className="house-funds-wrapper">
+            <div className="house-funds-icon">
+              <img src={dollarIcon} alt="Dollar Icon" />
+            </div>
+            <div className="house-funds-label">
+              <p>House</p>
+            </div>
+            <div className="house-funds-amount">
+              {flipCoinCanisterBalance ? (
+                <p>
+                  {e8sToIcp(flipCoinCanisterBalance).toFixed(2).toString()} ICP
+                </p>
+              ) : (
+                <div className="spinner-container">
+                  <Spinner />
+                </div>
+              )}
+            </div>
           </div>
-
-          <div
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "30%",
-              transform: "translate(-50%,-50%)",
-            }}
-          >
-            <p style={houseFundsTextStyle}>House</p>
-          </div>
-
-          <div
-            style={{
-              position: "absolute",
-              top: "50%",
-              right: "5%",
-              transform: "translate(-50%,-50%)",
-            }}
-          >
-            {flipCoinCanisterBalance ? (
-              <p style={houseFundsTextStyle}>
-                {e8sToIcp(flipCoinCanisterBalance).toFixed(2).toString()} $ICP
-              </p>
-            ) : (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Spinner />
-              </div>
-            )}
-          </div>
-        </div>
+        </NeonContainer>
       </div>
 
       <div className="header-center-coins-container-pos">
-        <FlipHistory flipHistory={flipHistory} statistics={stats} />
+        <NeonContainer variant="wide">
+          <FlipHistory flipHistory={flipHistory} statistics={stats} />
+        </NeonContainer>
+
+        <div style={{ textAlign: "center" }}>
+          {stats && (
+            <>
+              <p style={{ fontSize: "1rem", padding: "0" }}>
+                Heads:{" "}
+                {stats.headsRate ? (
+                  stats.headsRate?.toFixed(2).toString()
+                ) : (
+                  <Spinner style={{ width: "1rem", height: "1rem" }} />
+                )}
+                {""}% Tails:{" "}
+                {stats.tailsRate ? (
+                  stats.tailsRate?.toFixed(2).toString()
+                ) : (
+                  <Spinner style={{ width: "1rem", height: "1rem" }} />
+                )}
+                {""}%
+              </p>
+            </>
+          )}
+        </div>
       </div>
 
       <div className="header-item-3-pos">
