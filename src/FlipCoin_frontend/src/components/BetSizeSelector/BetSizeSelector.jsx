@@ -94,12 +94,12 @@ function BetSizeSelector({
 
   const handleChooseBetSize = (amount) => {
     if (!isIdentified) {
-      callToaster(false, `Failed`, `Please connect your wallet`, 2000);
+      callToaster(false, `Failed`, `Please connect your wallet`, "", 2000);
       return;
     }
 
     setBidAmount(amount);
-    callToaster(true, `Bid Placed`, `You're bidding ${amount} ICP.`, 2000);
+    callToaster(true, `Bid Placed`, `You're bidding ${amount} ICP.`, "", 2000);
   };
 
   return (

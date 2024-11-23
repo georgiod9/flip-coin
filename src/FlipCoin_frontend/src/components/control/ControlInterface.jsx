@@ -11,6 +11,7 @@ import { getUserDepositAddress } from "../../scripts/getPrincipal";
 import { retrieveTransferFee } from "../../scripts/fee";
 import SelectButton from "../Select-button/SelectButton";
 import BetSizeSelector from "../BetSizeSelector/BetSizeSelector";
+import "./ControlInterface.css";
 
 function ControlInterface({
   isIdentified,
@@ -96,7 +97,7 @@ function ControlInterface({
 
   const handleChooseSide = (side) => {
     if (!isIdentified) {
-      callToaster(false, `Failed`, `Please connect your wallet`, 2000);
+      callToaster(false, `Failed`, `Please connect your wallet`, "", 2000);
       return;
     }
 
@@ -106,12 +107,18 @@ function ControlInterface({
       setSelectedSide(0);
     }
 
-    callToaster(true, `Side Chosen`, `You chose ${side.toUpperCase()}`, 2000);
+    callToaster(
+      true,
+      `Side Chosen`,
+      `You chose ${side.toUpperCase()}`,
+      "",
+      2000
+    );
   };
 
   const handleChooseBetSize = (amount) => {
     setBidAmount(amount);
-    callToaster(true, `Bid Placed`, `You're bidding ${amount} ICP.`, 2000);
+    callToaster(true, `Bid Placed`, `You're bidding ${amount} ICP.`, "", 2000);
   };
 
   const topUp = async (amount) => {
@@ -148,6 +155,7 @@ function ControlInterface({
           false,
           `Deposit Failed`,
           `Failed to deposit ${e8sToIcp(amount)}.`,
+          "",
           1500
         );
 
@@ -158,6 +166,7 @@ function ControlInterface({
           true,
           `Deposit Success`,
           `Deposited ${e8sToIcp(amount)}.`,
+          "",
           1500
         );
       }
@@ -195,7 +204,7 @@ function ControlInterface({
 
   const handleSubmitFlip = async () => {
     if (!isIdentified) {
-      callToaster(false, `Failed`, `Please connect your wallet`, 2000);
+      callToaster(false, `Failed`, `Please connect your wallet`, "", 2000);
       return;
     }
 
@@ -229,7 +238,7 @@ function ControlInterface({
     //   return;
     // }
 
-    callToaster(true, `Flipping coin`, `Please wait for result.`, 2500);
+    callToaster(true, `Flipping coin`, `Please wait for result.`, "", 2500);
 
     console.log(`Flipping coin...`);
     const bidSide = selectedSide === 1 ? true : false;
@@ -246,6 +255,7 @@ function ControlInterface({
         ? `You won ${bidAmount * 1.95} ICP`
         : `You lost.`,
       `${result}`,
+      "",
       6000
     );
 
@@ -257,7 +267,7 @@ function ControlInterface({
     <Container
       fluid
       style={containerBorder}
-      className="d-flex flex-column justify-content-between align-items-center row-gap-1"
+      className="d-flex flex-column justify-content-between align-items-center row-gap-1 control-interface-wrapper"
     >
       <BetSizeSelector
         isIdentified={isIdentified}
