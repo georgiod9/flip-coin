@@ -6,6 +6,7 @@
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  /* border: 2px solid green; */
 }
 
 .wallet-button {
@@ -14,6 +15,55 @@
   position: relative;
   transition: all 0.3s ease;
   transform-origin: top center; /* Add this to set expansion origin */
+}
+
+/* Wallet icon styling */
+.wallet-icon {
+  position: absolute;
+  right: 10%;
+  top: 30px;
+  transform: translateY(-50%);
+  width: 35px; /* Match SVG viewBox width */
+  height: 35px; /* Match SVG viewBox height */
+  background: url("../../assets/svg/wallet_icon.svg") no-repeat center center;
+  background-size: contain;
+}
+
+/* Add responsive adjustments */
+@media (max-width: 768px) {
+  .wallet-button {
+    width: clamp(160px, 20vw, 300px); /* Adjusted for tablets */
+  }
+
+  .wallet-icon {
+    right: 8%;
+    width: 30px;
+    height: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .wallet-button {
+    /* width: clamp(130px, 25vw, 200px); Smaller width for mobile */
+    /* width: clamp(100px, 35vw, 160px); Smaller width for mobile */
+    width: 45vw;
+    /* width: 160px; */
+  }
+  .wallet-button-wrapper {
+    /* Match the non-expanded height */
+    height: clamp(40px, 6vh, 100px);
+  }
+  .wallet-button {
+    height: clamp(40px, 6vh, 100px);
+  }
+
+  .wallet-icon {
+    right: 15%;
+    top: 20px;
+    /* width: 25px; */
+    width: 20px;
+    height: 20px;
+  }
 }
 
 /* New hover effect - only applies when NOT expanded */
@@ -53,18 +103,6 @@
   z-index: -1;
   opacity: 0.8;
   pointer-events: none;
-}
-
-/* Wallet icon styling */
-.wallet-icon {
-  position: absolute;
-  right: 10%;
-  top: 30px;
-  transform: translateY(-50%);
-  width: 35px; /* Match SVG viewBox width */
-  height: 35px; /* Match SVG viewBox height */
-  background: url("../../assets/svg/wallet_icon.svg") no-repeat center center;
-  background-size: contain;
 }
 
 /* When modal is open */

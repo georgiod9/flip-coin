@@ -260,7 +260,7 @@ function AuthIdentity({
   }, []);
 
   return (
-    <Container style={{ cursor: "pointer" }}>
+    <Container style={{ cursor: "pointer", padding: "0" }}>
       {isWalletConnected ? (
         <div style={{ position: "relative" }} onClick={toggleModal}>
           <WalletComponent isModalOpen={isModalOpen}>

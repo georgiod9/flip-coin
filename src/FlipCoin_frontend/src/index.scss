@@ -76,33 +76,6 @@ button[type="submit"] {
 }
 
 
-.header-main-div {
-  padding-top: 10px 20px;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  width: 100%;
-  position: relative;
-}
-
-.header-center-coins-container-pos {
-  margin-top: 40px;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%,-50%);
-}
-.coins-wrapper {
-  width: 100%;
-  max-width: 100%;
-  margin: 0 auto;
-}
-
 .house-funds-container-sizing {
   width: auto;
   max-width: 20vw;
@@ -112,78 +85,6 @@ button[type="submit"] {
   width: clamp(200px,15vw,450px);
 }
 
-.header-item-1-pos{
-  order: 0;
-}
-.header-item-2-pos{
-  order: 1;
-}
-.header-item-3-pos{
-  order: 2;
-}
-
-
-
-
-@media(max-width: 628px) {
-  .header-main-div {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-  }
-  .header-center-coins-container-pos {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%,100%);
-  }
-  .coins-wrapper {
-    width: 100vw;
-  }
-  
-  .header-item-1-pos{
-    order: 0;
-  }
-  .header-item-2-pos{
-    order: 2;
-  }
-  .header-item-3-pos{
-    order: 1;
-  }
-  .house-funds-container-sizing {
-    max-width: 50vw;
-  }
-  
-}
-
-@media(max-width: 460px) {
-  .house-funds-container-sizing {
-    max-width: 55vw;
-  }
-  .wallet-button-sizing {
-    width: 40vw;
-  }  
-}
-
-@media(max-width: 333px) {
-  .house-funds-container-sizing {
-    max-width: 70vw;
-  }
-  .wallet-button-sizing {
-    width: 20vw;
-  }  
-}
-
-// .select-button-background {
-//   background-image: url(./assets/svg/Flip_button_container.svg);
-//   background-position: center center;
-//   background-size: cover;
-// }
 .glow-effect {
   border-radius: 50%;
   box-shadow: 0 0 16px 16px rgba(0, 47, 135, 0.5);
@@ -197,49 +98,5 @@ button[type="submit"] {
   border-radius: 30px; /* Adjust for rounding */
   box-shadow: 0 0 15px 7px rgba(0, 47, 135, 0.75); /* Adjust color and size of glow */
   text-align: center; 
-}
-
-@media (max-width: 768px) {
-  .header-main-div {
-    flex-direction: column;
-    gap: 20px;
-    padding: 10px;
-  }
-
-  .header-center-coins-container-pos {
-    order: 2;
-    margin-top: 30px;
-    width: 90%;
-  }
-
-  .house-funds-container-sizing {
-    max-width: 45%;
-  }
-
-  .wallet-button-sizing {
-    max-width: 45%;
-  }
-
-  .header-item-1-pos,
-  .header-item-3-pos {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .header-main-div {
-    padding: 10px 5px;
-  }
-
-  .header-center-coins-container-pos {
-    width: 95%;
-  }
-
-  .house-funds-container-sizing,
-  .wallet-button-sizing {
-    max-width: 48%;
-  }
 }
 

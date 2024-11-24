@@ -82,7 +82,11 @@ function Header({
         <NeonContainer variant="house">
           <div className="house-funds-wrapper">
             <div className="house-funds-icon">
-              <img src={dollarIcon} alt="Dollar Icon" />
+              <img
+                src={dollarIcon}
+                alt="Dollar Icon"
+                className="house-funds-icon-img"
+              />
             </div>
             <div className="house-funds-label">
               <p>House</p>

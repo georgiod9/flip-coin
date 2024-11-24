@@ -17,15 +17,22 @@
   align-items: center;
   width: 100%;
   height: 100%;
-  padding: 0 1.8rem; /* Increased padding for better spacing */
-  gap: 1.5rem; /* Consistent spacing between elements */
+  padding: 0rem 0.5rem; /* Increased padding for better spacing */
+  /* gap: 1.2rem; Consistent spacing between elements */
+  gap: 1vw; /* Consistent spacing between elements */
 }
 
 .house-funds-icon {
   display: flex;
   align-items: center;
-  width: clamp(12px, 1vw, 25px);
   height: auto;
+}
+
+.house-funds-icon-img {
+  /* width: clamp(20px, 1vw, 35px); */
+  width: clamp(16px, 1.5vw, 30px);
+  height: auto;
+  object-fit: contain;
 }
 
 .house-funds-label {
@@ -33,7 +40,7 @@
   align-items: center;
   margin: 0;
   white-space: nowrap;
-  font-size: clamp(14px, 1vw, 20px);
+  font-size: clamp(12px, 0.9vw, 16px);
   color: rgb(255, 255, 255); /* Match the neon color */
   margin-right: auto; /* Push the balance to the right */
 }
@@ -44,7 +51,7 @@
   margin: 0;
   margin-left: auto;
   white-space: nowrap;
-  font-size: clamp(14px, 1vw, 20px);
+  font-size: clamp(12px, 0.9vw, 16px);
   color: white;
 }
 .spinner-container {
@@ -61,38 +68,58 @@
 
 @media (max-width: 768px) {
   .house-funds-wrapper {
-    width: 100%;
-    max-width: 300px;
-    margin: 0 auto;
+    padding: 0 0.1rem;
+    gap: 0.5rem;
   }
 
-  .house-funds-icon {
-    left: 12%;
+  .house-funds-icon-img {
+    width: clamp(10px, 0.9vw, 16px);
   }
 
   .house-funds-label {
-    left: 25%;
-    font-size: clamp(14px, 3vw, 16px);
+    font-size: clamp(11px, 2.5vw, 14px);
   }
 
   .house-funds-amount {
-    right: 8%;
-    font-size: clamp(14px, 3vw, 16px);
+    font-size: clamp(11px, 2.5vw, 14px);
   }
 }
 
 @media (max-width: 480px) {
   .house-funds-wrapper {
-    max-width: 250px;
+    padding: 0 0.5rem;
+    gap: 0.5rem;
   }
 
-  .house-funds-icon {
-    left: 10%;
-    width: clamp(12px, 2.5vw, 15px);
+  .house-funds-icon-img {
+    width: clamp(8px, 0.8vw, 14px);
   }
-
   .house-funds-label {
-    left: 22%;
+    font-size: clamp(10px, 1rem, 12px);
+    /* font-size: clamp(10px, 2.2vw, 12px); */
+  }
+
+  .house-funds-amount {
+    font-size: clamp(10px, 1rem, 12px);
+    /* font-size: clamp(10px, 2.2vw, 12px); */
+  }
+}
+
+@media (max-width: 300px) {
+  .house-funds-wrapper {
+    padding: 0 0.4rem;
+    gap: 0.2rem;
+  }
+
+  .house-funds-icon-img {
+    width: clamp(8px, 0.8vw, 14px);
+  }
+  .house-funds-label {
+    font-size: clamp(8px, 3vw, 10px);
+  }
+
+  .house-funds-amount {
+    font-size: clamp(8px, 4vw, 10px);
   }
 }
 
@@ -124,31 +151,36 @@
 /* Media queries for responsive layout */
 @media (max-width: 680px) {
   .header-main-div {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
+    display: flex;
+    flex-wrap: wrap;
     padding: 0.75rem;
+    gap: 1rem;
   }
 
-  /* First row with house and wallet */
+  /* First row: flip history (full width) */
+  .header-center-coins-container-pos {
+    flex: 0 0 100%; /* Full width */
+    order: 3;
+    width: 90%;
+    margin: 0 auto;
+  }
+
+  /* Second row: house and wallet */
   .header-item-1-pos {
-    grid-row: 1;
-    grid-column: 1;
-    justify-self: start;
+    flex: 0 0 auto; /* Natural width */
+    order: 1;
   }
 
   .header-item-3-pos {
-    grid-row: 1;
-    grid-column: 1;
-    justify-self: end;
-  }
-
-  /* Second row with flip history */
-  .header-center-coins-container-pos {
-    grid-row: 2;
-    grid-column: 1;
-    justify-self: center;
-    width: 90%;
-    margin-top: 1rem;
+    /* flex: 1; Take remaining space */
+    /* order: 3; */
+    /* display: flex; */
+    /* justify-content: flex-end; Stick to right edge */
+    margin-left: auto; /* This pushes the element to the right */
+    order: 2;
+    display: flex;
+    justify-content: flex-end;
+    /* border: 1px solid red; */
   }
 }
 
