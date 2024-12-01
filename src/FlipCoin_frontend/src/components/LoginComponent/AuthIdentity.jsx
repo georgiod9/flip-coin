@@ -58,13 +58,19 @@ function AuthIdentity({
       let authClient = await AuthClient.create();
       console.log(`Auth client init`, authClient);
 
+      const popUpHeight = 0.42 * window.innerWidth;
+      const popUpWidth = 0.35 * window.innerWidth;
+
+      const left = window.innerWidth / 2 - popUpWidth / 2;
+      const top = window.innerHeight / 2 - popUpHeight / 3;
+
       await new Promise((resolve, reject) => {
         //safari: http://bw4dl-smaaa-aaaaa-qaacq-cai.localhost:4943/
         //http://bw4dl-smaaa-aaaaa-qaacq-cai.127.0.0.1:4943/
         //
         authClient.login({
-          //
           identityProvider: config.identityProvider,
+          windowOpenerFeatures: `toolbar=0,location=0,menubar=0,width=${popUpWidth},height=${popUpHeight},left=${left},top=${top}`,
           maxTimeToLive: BigInt(
             config.loginExpiry * 24 * 60 * 60 * 1000 * 1000 * 1000
           ),
