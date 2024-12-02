@@ -363,7 +363,7 @@ function AuthIdentity({
       ) : (
         <div onClick={connectWallet} style={{ position: "relative" }}>
           <WalletComponent isModalOpen={false}>
-            <div className="wallet-content">
+            <div className="wallet-content justify-center">
               <p className="connect-text">Connect</p>
             </div>
           </WalletComponent>
