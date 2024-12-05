@@ -98,7 +98,10 @@ function Header({
                 </p>
               ) : (
                 <div className="spinner-container">
-                  <Spinner />
+                  <Spinner
+                    // style={{ width: "1rem", height: "1rem" }}
+                    className="wallet-spinner"
+                  />
                 </div>
               )}
             </div>
@@ -119,13 +122,13 @@ function Header({
                 {stats.headsRate ? (
                   stats.headsRate?.toFixed(2).toString()
                 ) : (
-                  <Spinner style={{ width: "1rem", height: "1rem" }} />
+                  <Spinner className="wallet-spinner-small" />
                 )}
                 {""}% Tails:{" "}
                 {stats.tailsRate ? (
                   stats.tailsRate?.toFixed(2).toString()
                 ) : (
-                  <Spinner style={{ width: "1rem", height: "1rem" }} />
+                  <Spinner className="wallet-spinner-small" />
                 )}
                 {""}%
               </p>

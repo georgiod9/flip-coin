@@ -70,3 +70,19 @@
     /* width: 8vw; */
   }
 }
+
+.wallet-spinner {
+  width: 30px !important;
+  height: 30px !important;
+  font-size: 0.5rem;
+  /* border-width: 0.15rem; */
+  margin: 0 auto;
+}
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  margin: 0;
+}

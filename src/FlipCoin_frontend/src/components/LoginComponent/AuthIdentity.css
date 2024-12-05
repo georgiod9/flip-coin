@@ -44,6 +44,7 @@
   flex-direction: column;
   gap: 4px;
   margin-top: 2px;
+  padding-top: 10px;
   width: 100%;
   opacity: 0;
   transform: translateY(-10px);
@@ -218,5 +219,31 @@
 
   .balance-info {
     font-size: 0.45em !important;
+  }
+}
+
+.wallet-spinner {
+  width: 25px !important;
+  height: 25px !important;
+  font-size: 0.5rem;
+  border-width: 0.15rem;
+  margin: 0 auto;
+}
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  .wallet-spinner {
+    width: 15px !important;
+    height: 15px !important;
+    font-size: 0.5rem;
+    border-width: 0.05rem;
+    margin: 0 auto;
   }
 }

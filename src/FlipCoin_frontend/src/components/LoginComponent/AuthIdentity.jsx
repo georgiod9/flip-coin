@@ -278,7 +278,9 @@ function AuthIdentity({
                   </p>
                 </Container>
               ) : (
-                <Spinner />
+                <div className="spinner-container">
+                  <Spinner className="wallet-spinner" />
+                </div>
               )}
               {isModalOpen && (
                 <div className="expanded-content">

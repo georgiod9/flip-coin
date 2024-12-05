@@ -32,7 +32,7 @@
 /* Add responsive adjustments */
 @media (max-width: 768px) {
   .wallet-button {
-    width: clamp(160px, 20vw, 300px); /* Adjusted for tablets */
+    width: clamp(160px, 25vw, 380px); /* Adjusted for tablets */
   }
 
   .wallet-icon {
@@ -107,7 +107,8 @@
 
 /* When modal is open */
 .wallet-button.expanded {
-  height: clamp(280px, 18vh, 380px);
+  /* height: clamp(280px, 18vh, 380px); */
+  height: clamp(285px, 18vh, 380px);
 }
 
 /* Animation for expanded content */

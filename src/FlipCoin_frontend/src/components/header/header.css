@@ -54,12 +54,6 @@
   font-size: clamp(12px, 0.9vw, 16px);
   color: white;
 }
-.spinner-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: auto;
-}
 
 .house-funds-label p,
 .house-funds-amount p {
@@ -192,4 +186,28 @@
   .header-center-coins-container-pos {
     width: 85%;
   }
+}
+
+.wallet-spinner-small {
+  width: 15px !important;
+  height: 15px !important;
+  font-size: 0.5rem;
+  border-width: 0.15rem;
+  margin: 0 auto;
+}
+
+.wallet-spinner {
+  width: 25px !important;
+  height: 25px !important;
+  font-size: 0.5rem;
+  /* border-width: 0.15rem; */
+  margin: 0 auto;
+}
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  margin: 0;
 }
