@@ -27,18 +27,6 @@ function ControlInterface({
     headsRate: null,
     headsCount: null,
   });
-  const containerBorder = {
-    width: window.innerWidth < 450 ? "80vw" : "100vw",
-    height: "auto",
-    margin: "auto auto",
-    padding: "10px 10px",
-  };
-
-  const buttonsContainerStyle = {
-    width: window.innerWidth < 450 ? "70vw" : "25vw",
-    height: "auto",
-    padding: "10px 10px",
-  };
 
   const handleChooseSide = (side) => {
     if (!isIdentified) {
@@ -108,7 +96,6 @@ function ControlInterface({
   return (
     <Container
       fluid
-      style={containerBorder}
       className="d-flex flex-column justify-content-between align-items-center row-gap-1 control-interface-wrapper"
     >
       <div className="control-interface">
@@ -118,35 +105,25 @@ function ControlInterface({
           callToaster={callToaster}
         />
 
-        <Container style={buttonsContainerStyle}>
-          <Row>
-            <Col style={{ padding: "5px 5px" }} xs={6} md={6}>
-              <SelectButton
-                text={"HEADS"}
-                onClick={() => handleChooseSide("heads")}
-                type={"select-side"}
-              />
-            </Col>
-
-            <Col style={{ padding: "5px 5px" }} xs={6} md={6}>
-              <SelectButton
-                text={"TAILS"}
-                onClick={() => handleChooseSide("tails")}
-                type={"select-side"}
-              />
-            </Col>
-          </Row>
-
-          <Row>
-            <Col style={{ padding: "5px 5px" }}>
-              <SelectButton
-                text={"FLIP"}
-                onClick={() => handleSubmitFlip()}
-                type={"submit-flip"}
-              />
-            </Col>
-          </Row>
-        </Container>
+        <div className="buttons-container">
+          <div className="choice-buttons">
+            <SelectButton
+              text={"HEADS"}
+              onClick={() => handleChooseSide("heads")}
+              type={"select-side"}
+            />
+            <SelectButton
+              text={"TAILS"}
+              onClick={() => handleChooseSide("tails")}
+              type={"select-side"}
+            />
+          </div>
+          <SelectButton
+            text={"FLIP"}
+            onClick={() => handleSubmitFlip()}
+            type={"submit-flip"}
+          />
+        </div>
       </div>
     </Container>
   );
