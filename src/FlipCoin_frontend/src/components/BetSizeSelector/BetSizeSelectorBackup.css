@@ -25,8 +25,8 @@
   align-items: center;
   overflow: visible;
   box-shadow: 0px 0px 30px rgba(0, 93, 206, 0.8),
-    inset 10px 10px 20px rgba(0, 93, 206, 0.8),
-    inset -10px -10px 20px rgba(0, 93, 206, 0.8);
+    /* Outer glow */ inset 10px 10px 20px rgba(0, 93, 206, 0.8),
+    /* Top-left inner glow */ inset -10px -10px 20px rgba(0, 93, 206, 0.8); /* Bottom-right inner glow */
 }
 
 /* Blue neon border (outer) */
@@ -39,22 +39,7 @@
   bottom: 0;
   border-radius: 30px;
   padding: 8px;
-  background: linear-gradient(
-      to bottom,
-      #005cce 0%,
-      #005cce 95%,
-      transparent 95%
-    ),
-    linear-gradient(
-      90deg,
-      #005cce 0%,
-      #005cce 25%,
-      transparent 25%,
-      transparent 75%,
-      #005cce 75%,
-      #005cce 100%
-    );
-  /* background-blend-mode: multiply; */
+  background: #005cce;
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -71,31 +56,19 @@
   bottom: 2.5px;
   border-radius: 28px;
   padding: 2.5px;
-  background: linear-gradient(to bottom, white 0%, white 95%, transparent 95%),
-    linear-gradient(
-      90deg,
-      white 0%,
-      white 22%,
-      transparent 22%,
-      transparent 78%,
-      white 78%,
-      white 100%
-    );
-  background-blend-mode: multiply;
+  background: rgba(255, 255, 255, 1);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
+  box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.8),
+    inset 20px 20px 10px rgba(255, 255, 255, 0.8);
 }
 
 .coin-icon {
-  position: absolute;
-  width: 95vw;
-  max-width: 200px;
-  height: auto;
-  left: 50%;
-  top: 40%;
-  transform: translate(-50%, -50%);
+  width: 120px;
+  height: 120px;
+  margin-bottom: 30px;
 }
 
 .main-text {
@@ -105,13 +78,14 @@
 }
 
 .bid-buttons-container {
-  position: absolute;
   display: flex;
   justify-content: center;
   gap: 15px;
   width: 100%;
   max-width: 800px;
-  bottom: -45px;
+  margin-top: auto;
+  position: absolute;
+  bottom: -25px;
   z-index: 2;
 }
 
@@ -127,7 +101,8 @@
 }
 
 .bid-button {
-  background: #000000cc;
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid #00ffff;
   border-radius: 50%;
   padding: 20px;
   text-align: center;
@@ -137,64 +112,28 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  box-shadow: 0px 0px 25px rgba(0, 93, 206, 0.8),
-    inset 10px 10px 20px rgba(0, 93, 206, 0.8),
-    inset -10px -10px 20px rgba(0, 93, 206, 0.8);
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
 }
 
-.bid-button:hover {
-  box-shadow: 0px 0px 70px rgba(0, 93, 206, 0.8),
-    /* Outer glow */ inset 20px 20px 30px rgba(0, 93, 206, 0.8),
-    /* Top-left inner glow */ inset -10px -10px 30px rgba(0, 93, 206, 0.8); /* Bottom-right inner glow */
-}
-
-/* Blue outer border */
-.bid-button::before {
+/* Glow effect on hover */
+.bid-button:hover::after {
   content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 50%;
-  padding: 8px;
-  background: #005cce;
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-  box-shadow: 0 0 10px rgba(0, 93, 206, 0.8);
-}
-
-/* White inner border */
-.bid-button::after {
-  content: "";
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  right: 3px;
-  bottom: 3px;
-  border-radius: 50%;
-  padding: 2px;
-  background: white;
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
+  inset: 0;
+  background: linear-gradient(135deg, #0066ff33, #00ffff33);
+  border-radius: 15px;
 }
 
 .bid-amount {
   font-size: clamp(16px, 1.3vw, 24px);
   margin: 0;
   color: #fff;
-  z-index: 1; /* Ensure text stays above borders */
 }
 
 .bid-currency {
   font-size: clamp(12px, 1vw, 16px);
   margin: 0;
-  color: #fff;
-  z-index: 1; /* Ensure text stays above borders */
+  color: #00ffff;
 }
 
 /* Responsive adjustments */
@@ -224,6 +163,12 @@
     min-height: 300px;
   }
 
+  .coin-icon {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 20px;
+  }
+
   .bid-buttons-container {
     bottom: -15px;
     gap: 5px;
@@ -231,11 +176,5 @@
 
   .bid-button-wrapper {
     max-width: 60px;
-  }
-
-  .coin-icon {
-    max-width: 80vw;
-    width: 80vw;
-    top: 35%;
   }
 }

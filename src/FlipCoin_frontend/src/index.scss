@@ -1,4 +1,3 @@
-
 @font-face {
   font-family: 'AcuminVariableConcept';
   src: url('./assets/fonts/AcuminVariableConcept.otf') format('opentype');
@@ -67,45 +66,18 @@ button[type="submit"] {
 .main-background {
   width: 100vw;
   height: 100vh;
+  min-height: 100vh;
   background-image: url(../src/assets/svg/Bg.svg);
   background-position: center center;
   background-size: cover;
+  background-repeat: no-repeat;
+  overflow-x: hidden;
+  position: relative;
 }
 
 
-.header-main-div {
-  padding-top: 10px;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
-
-.header-center-coins-container-pos {
-  margin-top: 40px;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%,-50%);
-}
-.coins-wrapper {
-  width: 100%;
-}
-
-.header-item-1-pos{
-  order: 0;
-}
-.header-item-2-pos{
-  order: 1;
-}
-.header-item-3-pos{
-  order: 2;
-}
 .house-funds-container-sizing {
+  width: auto;
   max-width: 20vw;
 }
 
@@ -113,65 +85,6 @@ button[type="submit"] {
   width: clamp(200px,15vw,450px);
 }
 
-@media(max-width: 628px) {
-  .header-main-div {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-  }
-  .header-center-coins-container-pos {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%,100%);
-  }
-  .coins-wrapper {
-    width: 100vw;
-  }
-  
-  .header-item-1-pos{
-    order: 0;
-  }
-  .header-item-2-pos{
-    order: 2;
-  }
-  .header-item-3-pos{
-    order: 1;
-  }
-  .house-funds-container-sizing {
-    max-width: 50vw;
-  }
-  
-}
-
-@media(max-width: 460px) {
-  .house-funds-container-sizing {
-    max-width: 55vw;
-  }
-  .wallet-button-sizing {
-    width: 40vw;
-  }  
-}
-
-@media(max-width: 333px) {
-  .house-funds-container-sizing {
-    max-width: 70vw;
-  }
-  .wallet-button-sizing {
-    width: 20vw;
-  }  
-}
-
-// .select-button-background {
-//   background-image: url(./assets/svg/Flip_button_container.svg);
-//   background-position: center center;
-//   background-size: cover;
-// }
 .glow-effect {
   border-radius: 50%;
   box-shadow: 0 0 16px 16px rgba(0, 47, 135, 0.5);

@@ -1,0 +1,88 @@
+.flip-history-container {
+  width: 100%;
+  /* max-width: 550px; */
+  max-width: clamp(350px, 50vw, 550px);
+  height: 100%;
+  position: relative;
+}
+
+.coins-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+}
+
+.coins-container {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  gap: 0.5rem;
+}
+
+.coin-token {
+  width: clamp(30px, 3vw, 45px);
+  height: auto;
+  flex-shrink: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .flip-history-container {
+    max-width: 350px;
+  }
+
+  .coins-container {
+    gap: 0.15rem; /* Smaller gap for medium screens */
+  }
+
+  .coin-token {
+    /* width: clamp(20px, 2vw, 30px); */
+    /* width: clamp(20px, 2vw, 30px); */
+    width: 3vw;
+  }
+}
+
+@media (max-width: 680px) {
+  .coin-token {
+    width: 8vw;
+  }
+}
+
+@media (max-width: 480px) {
+  .flip-history-container {
+    max-width: 350px;
+  }
+
+  .coins-container {
+    gap: 0.15rem; /* Smallest gap for mobile */
+  }
+
+  .coin-token {
+    /* width: clamp(18px, 1.8vw, 25px); */
+    width: clamp(20px, 8vw, 35px);
+    /* width: 8vw; */
+  }
+}
+
+.wallet-spinner {
+  width: 30px !important;
+  height: 30px !important;
+  font-size: 0.5rem;
+  /* border-width: 0.15rem; */
+  margin: 0 auto;
+}
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  margin: 0;
+}

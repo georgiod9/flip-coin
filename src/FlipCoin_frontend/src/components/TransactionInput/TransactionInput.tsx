@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Form, InputGroup } from "react-bootstrap";
 import "./TransactionInput.css";
 interface TransactionInputProps {
@@ -25,13 +25,6 @@ export function TransactionInput({
     }
   };
 
-  const handleMaxClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (maxAmount) {
-      setAmount(maxAmount.toString());
-    }
-  };
-
   return (
     <Form
       onSubmit={handleSubmit}
@@ -46,7 +39,7 @@ export function TransactionInput({
           }
           placeholder="Amount"
           min="0"
-          max={maxAmount}
+          max={maxAmount || undefined}
           step="0.01"
           className="top-up-input"
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
@@ -54,9 +47,14 @@ export function TransactionInput({
         {isWithdraw && (
           <Button
             variant="outline-secondary"
-            onClick={handleMaxClick}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (maxAmount) {
+                setAmount(maxAmount.toString());
+              }
+            }}
             className="max-button"
-            disabled={maxAmount === undefined || maxAmount <= 0}
+            disabled={!maxAmount || maxAmount <= 0}
           >
             Max
           </Button>
@@ -68,6 +66,7 @@ export function TransactionInput({
           disabled={
             !amount ||
             isNaN(Number(amount)) ||
+            Number(amount) <= 0 ||
             (maxAmount !== undefined && Number(amount) > maxAmount)
           }
         >

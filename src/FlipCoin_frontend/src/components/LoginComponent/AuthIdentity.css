@@ -14,6 +14,10 @@
   justify-content: center;
 }
 
+.justify-center {
+  justify-content: center;
+}
+
 .balance-container {
   position: relative;
   margin-bottom: 0;
@@ -31,7 +35,7 @@
 
 .balance-text {
   margin: 0;
-  font-size: 0.8em;
+  font-size: clamp(14px, 1vw, 16px);
   white-space: nowrap;
 }
 
@@ -40,6 +44,7 @@
   flex-direction: column;
   gap: 4px;
   margin-top: 2px;
+  padding-top: 10px;
   width: 100%;
   opacity: 0;
   transform: translateY(-10px);
@@ -110,12 +115,12 @@
 
 .connect-text {
   white-space: nowrap;
-  font-size: clamp(12px, 1.5vw, 24px);
+  font-size: clamp(14px, 1.2vw, 18px);
   margin: 0;
   padding: 0;
   width: 100%;
   text-align: center;
-  padding-right: 60px !important; /* Compensate for wallet icon space */
+  padding-right: 45px !important; /* Space for wallet icon */
 }
 
 .copy-icon {
@@ -135,4 +140,110 @@
 
 .copy-icon:hover {
   color: rgba(255, 255, 255, 0.9);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .wallet-content {
+    padding: 12px;
+  }
+
+  .balance-container {
+    padding: 0 40px 0 12px !important;
+  }
+
+  .balance-text {
+    font-size: clamp(12px, 1.1vw, 14px);
+  }
+
+  .connect-text {
+    font-size: clamp(12px, 1.1vw, 16px);
+    padding-right: 35px !important;
+  }
+
+  /* Adjust expanded content for tablets */
+  .expanded-content {
+    gap: 3px;
+  }
+
+  .expanded-content .btn-outline-light {
+    font-size: 0.75em;
+    height: 28px;
+  }
+
+  .principal-container p {
+    font-size: 0.6em;
+  }
+}
+
+@media (max-width: 480px) {
+  .wallet-content {
+    padding: 10px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .balance-container {
+    padding: 0 35px 0 10px !important;
+  }
+
+  .balance-text {
+    font-size: clamp(11px, 1vw, 13px);
+  }
+
+  .connect-text {
+    font-size: clamp(11px, 1vw, 14px);
+    line-height: 1;
+    padding-right: 35px !important;
+  }
+
+  /* Adjust expanded content for mobile */
+  .expanded-content {
+    gap: 2px;
+    margin-top: 1px;
+  }
+
+  .expanded-content .btn-outline-light {
+    font-size: 0.7em;
+    height: 26px;
+    padding: 4px 0;
+  }
+
+  .principal-container p {
+    font-size: 0.55em;
+  }
+
+  .expanded-content p {
+    font-size: 0.6em;
+  }
+
+  .balance-info {
+    font-size: 0.45em !important;
+  }
+}
+
+.wallet-spinner {
+  width: 25px !important;
+  height: 25px !important;
+  font-size: 0.5rem;
+  border-width: 0.15rem;
+  margin: 0 auto;
+}
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  .wallet-spinner {
+    width: 15px !important;
+    height: 15px !important;
+    font-size: 0.5rem;
+    border-width: 0.05rem;
+    margin: 0 auto;
+  }
 }

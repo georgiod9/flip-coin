@@ -5,6 +5,7 @@ import { icpToE8s } from "../../scripts/e8s";
 import SelectButton from "../Select-button/SelectButton";
 import BetSizeSelector from "../BetSizeSelector/BetSizeSelector";
 import "./ControlInterface.css";
+import { AuthClient } from "@dfinity/auth-client";
 
 function ControlInterface({
   isIdentified,
@@ -14,11 +15,13 @@ function ControlInterface({
   refreshControl,
   identifiedActor,
   identifiedIcpActor,
+  hasPendingControl,
 }) {
   const [lastFlipId, setLastFlipId] = useState(0);
   const [flipHistory, setFlipHistory] = useState([]);
   const [selectedSide, setSelectedSide] = useState(-1); // -1 unselected, 0 tails, 1 heads
   const [bidAmount, setBidAmount] = useState(0);
+  const [hasPending, setHasPending] = hasPendingControl;
 
   const [stats, setStats] = useState({
     initialized: false,
@@ -27,18 +30,6 @@ function ControlInterface({
     headsRate: null,
     headsCount: null,
   });
-  const containerBorder = {
-    width: window.innerWidth < 450 ? "80vw" : "100vw",
-    height: "auto",
-    margin: "auto auto",
-    padding: "10px 10px",
-  };
-
-  const buttonsContainerStyle = {
-    width: window.innerWidth < 450 ? "70vw" : "25vw",
-    height: "auto",
-    padding: "10px 10px",
-  };
 
   const handleChooseSide = (side) => {
     if (!isIdentified) {
@@ -62,6 +53,9 @@ function ControlInterface({
   };
 
   const handleSubmitFlip = async () => {
+    const authClient = await AuthClient.create();
+    const id = authClient.getIdentity();
+    console.log(`Using identity:`, id.getPrincipal().toString());
     if (!isIdentified) {
       callToaster(false, `Failed`, `Please connect your wallet`, "", 2000);
       return;
@@ -82,12 +76,15 @@ function ControlInterface({
       return;
     }
 
+    setHasPending((prev) => [...prev, "submitFlip"]);
+
     callToaster(true, `Flipping coin`, `Please wait for result.`, "", 2500);
 
     const bidSide = selectedSide === 1 ? true : false;
     const result = await backendActor.submitFlip(bidSide, icpToE8s(bidAmount));
     console.log(`result: `, result);
 
+    setHasPending((prev) => prev.filter((item) => item !== "submitFlip"));
     toggleRefresh();
 
     // TODO: Calculate reward based on actual multiplier from canister
@@ -108,44 +105,35 @@ function ControlInterface({
   return (
     <Container
       fluid
-      style={containerBorder}
       className="d-flex flex-column justify-content-between align-items-center row-gap-1 control-interface-wrapper"
     >
-      <BetSizeSelector
-        isIdentified={isIdentified}
-        betSizeControl={[bidAmount, setBidAmount]}
-        callToaster={callToaster}
-      />
+      <div className="control-interface">
+        <BetSizeSelector
+          isIdentified={isIdentified}
+          betSizeControl={[bidAmount, setBidAmount]}
+          callToaster={callToaster}
+        />
 
-      <Container style={buttonsContainerStyle}>
-        <Row>
-          <Col style={{ padding: "5px 5px" }} xs={6} md={6}>
+        <div className="buttons-container">
+          <div className="choice-buttons">
             <SelectButton
               text={"HEADS"}
               onClick={() => handleChooseSide("heads")}
               type={"select-side"}
             />
-          </Col>
-
-          <Col style={{ padding: "5px 5px" }} xs={6} md={6}>
             <SelectButton
               text={"TAILS"}
               onClick={() => handleChooseSide("tails")}
               type={"select-side"}
             />
-          </Col>
-        </Row>
-
-        <Row>
-          <Col style={{ padding: "5px 5px" }}>
-            <SelectButton
-              text={"FLIP"}
-              onClick={() => handleSubmitFlip()}
-              type={"submit-flip"}
-            />
-          </Col>
-        </Row>
-      </Container>
+          </div>
+          <SelectButton
+            text={"FLIP"}
+            onClick={() => handleSubmitFlip()}
+            type={"submit-flip"}
+          />
+        </div>
+      </div>
     </Container>
   );
 }

@@ -20,6 +20,7 @@ interface TransferModalProps {
     timeout: number
   ) => void;
   toggleRefresh: () => void;
+  hasPendingControl: [string[], React.Dispatch<React.SetStateAction<string[]>>];
 }
 
 export function TransferModal({
@@ -30,9 +31,11 @@ export function TransferModal({
   balance,
   callToaster,
   toggleRefresh,
+  hasPendingControl,
 }: TransferModalProps) {
   const [destinationPrincipal, setDestinationPrincipal] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
+  const [hasPending, setHasPending] = hasPendingControl;
 
   const handleModalClick = (e: MouseEvent): void => {
     e.preventDefault();
@@ -107,6 +110,7 @@ export function TransferModal({
         );
         return;
       }
+      setHasPending((prev) => [...prev, "cashout"]);
 
       callToaster(true, "Cashing Out", "Transaction sent!", "", 1500);
 
@@ -133,6 +137,7 @@ export function TransferModal({
           );
         }
       }
+      setHasPending((prev) => prev.filter((item) => item !== "cashout"));
     } catch (error) {
       console.error(`Error cashing out`, error);
       callToaster(
@@ -142,6 +147,7 @@ export function TransferModal({
         "",
         1500
       );
+      setHasPending((prev) => prev.filter((item) => item !== "cashout"));
     }
   };
 
