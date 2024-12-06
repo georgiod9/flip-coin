@@ -48,10 +48,10 @@
     linear-gradient(
       90deg,
       #005cce 0%,
-      #005cce 30%,
-      transparent 30%,
-      transparent 70%,
-      #005cce 70%,
+      #005cce 25%,
+      transparent 25%,
+      transparent 75%,
+      #005cce 75%,
       #005cce 100%
     );
   /* background-blend-mode: multiply; */
@@ -75,10 +75,10 @@
     linear-gradient(
       90deg,
       white 0%,
-      white 25%,
-      transparent 25%,
-      transparent 75%,
-      white 75%,
+      white 22%,
+      transparent 22%,
+      transparent 78%,
+      white 78%,
       white 100%
     );
   background-blend-mode: multiply;
