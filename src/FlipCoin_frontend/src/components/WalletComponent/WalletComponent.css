@@ -6,6 +6,7 @@
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  z-index: 1000;
   /* border: 2px solid green; */
 }
 
@@ -27,6 +28,43 @@
   height: 35px; /* Match SVG viewBox height */
   background: url("../../assets/svg/wallet_icon.svg") no-repeat center center;
   background-size: contain;
+  z-index: 2; /* Ensure icon stays above glow */
+}
+
+/* Glow effect container */
+.wallet-icon-glow {
+  position: absolute;
+  right: 10%;
+  top: 30px;
+  transform: translateY(-50%);
+  width: 35px;
+  height: 35px;
+  z-index: 1;
+}
+
+/* Pulsing glow animation */
+@keyframes pulseGlow {
+  0% {
+    transform: translateY(-50%) scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateY(-50%) scale(1.5);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-50%) scale(1);
+    opacity: 0.5;
+  }
+}
+
+.wallet-icon-glow.active {
+  animation: pulseGlow 2s ease-in-out infinite;
+  background: radial-gradient(
+    circle,
+    rgba(0, 246, 255, 0.6) 0%,
+    rgba(0, 181, 255, 0) 70%
+  );
 }
 
 /* Add responsive adjustments */
@@ -35,7 +73,8 @@
     width: clamp(160px, 25vw, 380px); /* Adjusted for tablets */
   }
 
-  .wallet-icon {
+  .wallet-icon,
+  .wallet-icon-glow {
     right: 8%;
     width: 30px;
     height: 30px;
@@ -57,10 +96,10 @@
     height: clamp(40px, 6vh, 100px);
   }
 
-  .wallet-icon {
+  .wallet-icon,
+  .wallet-icon-glow {
     right: 15%;
     top: 20px;
-    /* width: 25px; */
     width: 20px;
     height: 20px;
   }

@@ -19,6 +19,8 @@ let backendPrincipal = process.env.CANISTER_ID_FLIPCOIN_BACKEND;
 function App() {
   const [backendActor, setBackendActor] = useState(FlipCoin_backend);
   const [triggerRefresh, setTriggerRefresh] = useState(false);
+  const [hasPending, setHasPending] = useState([]);
+
   const [walletIdentity, setWalletIdentity] = useState(null);
   const [identifiedActor, setIdentifiedActor] = useState(null);
   const [identifiedIcpLedgerActor, setIdentifiedIcpLedgerActor] =
@@ -76,6 +78,8 @@ function App() {
 
   useEffect(() => {
     const getBalances = async () => {
+      setHasPending((prev) => [...prev, "getBalances"]);
+
       const contractBalance = await getFlipCoinCanisterBalance(
         backendPrincipal
       );
@@ -95,6 +99,8 @@ function App() {
         const houseStatistics = await getHouseStatistics();
         console.log(`House stats: `, houseStatistics);
       }
+
+      setHasPending((prev) => prev.filter((item) => item !== "getBalances"));
     };
     getBalances();
   }, [
@@ -124,6 +130,7 @@ function App() {
         setBackendActor={setBackendActor}
         callToaster={callToaster}
         toggleRefresh={toggleRefresh}
+        hasPendingControl={[hasPending, setHasPending]}
       />
       {/* <Spacer space={"15"} unit={"vh"} /> */}
       {showToaster && (
@@ -156,6 +163,7 @@ function App() {
           identifiedActor={identifiedActor}
           identifiedIcpActor={identifiedIcpLedgerActor}
           refreshControl={[triggerRefresh, setTriggerRefresh]}
+          hasPendingControl={[hasPending, setHasPending]}
         />
       </div>
     </div>

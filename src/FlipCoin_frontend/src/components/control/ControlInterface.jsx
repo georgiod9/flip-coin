@@ -5,6 +5,7 @@ import { icpToE8s } from "../../scripts/e8s";
 import SelectButton from "../Select-button/SelectButton";
 import BetSizeSelector from "../BetSizeSelector/BetSizeSelector";
 import "./ControlInterface.css";
+import { AuthClient } from "@dfinity/auth-client";
 
 function ControlInterface({
   isIdentified,
@@ -14,11 +15,13 @@ function ControlInterface({
   refreshControl,
   identifiedActor,
   identifiedIcpActor,
+  hasPendingControl,
 }) {
   const [lastFlipId, setLastFlipId] = useState(0);
   const [flipHistory, setFlipHistory] = useState([]);
   const [selectedSide, setSelectedSide] = useState(-1); // -1 unselected, 0 tails, 1 heads
   const [bidAmount, setBidAmount] = useState(0);
+  const [hasPending, setHasPending] = hasPendingControl;
 
   const [stats, setStats] = useState({
     initialized: false,
@@ -50,6 +53,9 @@ function ControlInterface({
   };
 
   const handleSubmitFlip = async () => {
+    const authClient = await AuthClient.create();
+    const id = authClient.getIdentity();
+    console.log(`Using identity:`, id.getPrincipal().toString());
     if (!isIdentified) {
       callToaster(false, `Failed`, `Please connect your wallet`, "", 2000);
       return;
@@ -70,12 +76,15 @@ function ControlInterface({
       return;
     }
 
+    setHasPending((prev) => [...prev, "submitFlip"]);
+
     callToaster(true, `Flipping coin`, `Please wait for result.`, "", 2500);
 
     const bidSide = selectedSide === 1 ? true : false;
     const result = await backendActor.submitFlip(bidSide, icpToE8s(bidAmount));
     console.log(`result: `, result);
 
+    setHasPending((prev) => prev.filter((item) => item !== "submitFlip"));
     toggleRefresh();
 
     // TODO: Calculate reward based on actual multiplier from canister

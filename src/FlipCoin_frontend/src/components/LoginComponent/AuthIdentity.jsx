@@ -36,12 +36,14 @@ function AuthIdentity({
   identifiedIcpLedgerActor,
   callToaster,
   toggleRefresh,
+  hasPendingControl,
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [tooltipMessage, setTooltipMessage] = useState("Copy to clipboard");
   const [showTransferModal, setShowTransferModal] = useState(false);
+  const [hasPending, setHasPending] = hasPendingControl;
 
   const connectWalletTextStyle = {
     whiteSpace: "nowrap",
@@ -54,6 +56,8 @@ function AuthIdentity({
     console.log(`Connecting wallet...`);
 
     try {
+      setHasPending((prev) => [...prev, "connectWallet"]);
+
       // Create an auth client
       let authClient = await AuthClient.create();
       console.log(`Auth client init`, authClient);
@@ -108,6 +112,8 @@ function AuthIdentity({
       setIsIdentified(true);
       setIdentifiedActor(actor);
 
+      setHasPending((prev) => prev.filter((item) => item !== "connectWallet"));
+
       console.log(`Created new actor from identified agent.`);
     } catch (error) {
       console.error("Error during wallet connection:", error);
@@ -118,12 +124,16 @@ function AuthIdentity({
 
   const logout = async () => {
     console.log(`<<LOGGING OUT>>`);
+    setHasPending((prev) => [...prev, "logout"]);
+
     const authClient = await AuthClient.create();
     await authClient.logout();
     setIsIdentified(false);
     setWalletIdentity(null);
     setIdentifiedActor(null);
     setIdentifiedIcpLedgerActor(null);
+
+    setHasPending((prev) => prev.filter((item) => item !== "logout"));
   };
 
   const toggleModal = () => {
@@ -168,6 +178,8 @@ function AuthIdentity({
   };
 
   const handleTopUp = async (amount) => {
+    setHasPending((prev) => [...prev, "topUp"]);
+
     console.log(`Topping up with ${amount} ICP`);
     callToaster(
       true,
@@ -192,11 +204,15 @@ function AuthIdentity({
         1500
       );
     }
+
+    setHasPending((prev) => prev.filter((item) => item !== "topUp"));
     toggleRefresh();
     return;
   };
 
   const handleWithdraw = async (amount) => {
+    setHasPending((prev) => [...prev, "withdraw"]);
+
     console.log(`Withdrawing ${amount} ICP`);
     callToaster(
       true,
@@ -218,13 +234,16 @@ function AuthIdentity({
         1500
       );
     }
+    setHasPending((prev) => prev.filter((item) => item !== "withdraw"));
     toggleRefresh();
     return;
   };
 
   useEffect(() => {
     const checkAuth = async () => {
+      setHasPending((prev) => [...prev, "checkAuth"]);
       let authClient = await AuthClient.create();
+
       if (authClient.isAuthenticated()) {
         console.log(`Identity already authorized. Rehydrating...`);
         const identity = authClient.getIdentity();
@@ -233,6 +252,8 @@ function AuthIdentity({
           identity.getPrincipal().toString().includes(config.loggedOutPrincipal)
         ) {
           await logout();
+          setHasPending((prev) => prev.filter((item) => item !== "checkAuth"));
+
           return;
         }
 
@@ -259,8 +280,12 @@ function AuthIdentity({
         console.log(`Done rehydrating identity.`);
       } else {
         await logout();
+        setHasPending((prev) => prev.filter((item) => item !== "checkAuth"));
+
         return;
       }
+
+      setHasPending((prev) => prev.filter((item) => item !== "checkAuth"));
     };
     checkAuth();
   }, []);
@@ -269,7 +294,7 @@ function AuthIdentity({
     <Container style={{ cursor: "pointer", padding: "0" }}>
       {isWalletConnected ? (
         <div style={{ position: "relative" }} onClick={toggleModal}>
-          <WalletComponent isModalOpen={isModalOpen}>
+          <WalletComponent isModalOpen={isModalOpen} hasPending={hasPending}>
             <div className="wallet-content">
               {accountCredit !== null && isWalletConnected ? (
                 <Container className="d-flex align-items-center balance-container">
@@ -318,13 +343,18 @@ function AuthIdentity({
                       accountBalance
                     )} ICP`}</p>
                   </div>
-                  <TransactionInput onTopUp={handleTopUp} buttonText="Top Up" />
-                  <TransactionInput
-                    onTopUp={handleWithdraw}
-                    buttonText="Withdraw"
-                    maxAmount={e8sToIcp(accountCredit)}
-                    isWithdraw={true}
-                  />
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <TransactionInput
+                      onTopUp={handleTopUp}
+                      buttonText="Top Up"
+                    />
+                    <TransactionInput
+                      onTopUp={handleWithdraw}
+                      buttonText="Withdraw"
+                      maxAmount={Number(e8sToIcp(accountCredit))}
+                      isWithdraw={true}
+                    />
+                  </div>
 
                   <Button
                     variant="outline-light"
@@ -358,13 +388,14 @@ function AuthIdentity({
                 balance={accountBalance}
                 callToaster={callToaster}
                 toggleRefresh={toggleRefresh}
+                hasPendingControl={hasPendingControl}
               />
             </div>
           </WalletComponent>
         </div>
       ) : (
         <div onClick={connectWallet} style={{ position: "relative" }}>
-          <WalletComponent isModalOpen={false}>
+          <WalletComponent isModalOpen={false} hasPending={hasPending}>
             <div className="wallet-content justify-center">
               <p className="connect-text">Connect</p>
             </div>

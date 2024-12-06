@@ -31,10 +31,13 @@ function Header({
   setBackendActor,
   callToaster,
   toggleRefresh,
+  hasPendingControl,
 }) {
   const [isMobileWidth, setMobileWidth] = useState(false);
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
   const [refresh] = refreshControl;
+  const [hasPending, setHasPending] = hasPendingControl;
+
   const [lastFlipId, setLastFlipId] = useState(0);
   const [flipHistory, setFlipHistory] = useState([]);
   const [stats, setStats] = useState({
@@ -52,15 +55,23 @@ function Header({
   useEffect(() => {
     const fromBackendFetch_RecentFlips = async () => {
       if (FlipCoin_backend) {
-        FlipCoin_backend.getLastFlipId().then((id) => {
-          setLastFlipId(id);
-          let start = Number(id) - 10 > 0 ? Number(id) - 10 : 0;
+        setHasPending((prev) => [...prev, "getRecentFlips"]);
 
-          FlipCoin_backend.getFlipHistory(start, id).then((flips) => {
-            console.log(`flip history: `, flips);
-            setFlipHistory(flips);
+        FlipCoin_backend.getLastFlipId()
+          .then((id) => {
+            setLastFlipId(id);
+            let start = Number(id) - 10 > 0 ? Number(id) - 10 : 0;
+
+            FlipCoin_backend.getFlipHistory(start, id).then((flips) => {
+              console.log(`flip history: `, flips);
+              setFlipHistory(flips);
+            });
+          })
+          .finally(() => {
+            setHasPending((prev) =>
+              prev.filter((item) => item !== "getRecentFlips")
+            );
           });
-        });
       }
     };
     fromBackendFetch_RecentFlips();
@@ -68,10 +79,18 @@ function Header({
 
   useEffect(() => {
     const fromBackendFetch_Statistics = async () => {
-      FlipCoin_backend.getStatistics().then((statistics) => {
-        console.log(`Fetched statistics`, statistics);
-        setStats({ initialized: true, ...statistics });
-      });
+      setHasPending((prev) => [...prev, "getStatistics"]);
+
+      FlipCoin_backend.getStatistics()
+        .then((statistics) => {
+          console.log(`Fetched statistics`, statistics);
+          setStats({ initialized: true, ...statistics });
+        })
+        .finally(() => {
+          setHasPending((prev) =>
+            prev.filter((item) => item !== "getStatistics")
+          );
+        });
     };
     fromBackendFetch_Statistics();
   }, [refresh]);
@@ -153,6 +172,7 @@ function Header({
           identifiedIcpLedgerActor={identifiedIcpLedgerActor}
           callToaster={callToaster}
           toggleRefresh={toggleRefresh}
+          hasPendingControl={hasPendingControl}
         />
       </div>
     </div>
