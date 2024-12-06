@@ -125,7 +125,7 @@ function App() {
         callToaster={callToaster}
         toggleRefresh={toggleRefresh}
       />
-      <Spacer space={"15"} unit={"vh"} />
+      {/* <Spacer space={"15"} unit={"vh"} /> */}
       {showToaster && (
         <Toaster
           headerContent={toastProps.toastHeader}

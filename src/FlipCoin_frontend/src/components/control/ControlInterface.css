@@ -1,6 +1,16 @@
 .control-interface-wrapper {
+  position: relative;
+  /* height: 90vh; */
   user-select: none;
-  -moz-user-select: none;
   -webkit-user-select: none;
+  -moz-user-select: none;
   -ms-user-select: none;
+}
+
+.control-interface {
+  width: 55vw;
+  height: 70vh;
+  position: relative;
+  transition: all 0.3s ease;
+  transform-origin: top center; /* Add this to set expansion origin */
 }

@@ -111,41 +111,43 @@ function ControlInterface({
       style={containerBorder}
       className="d-flex flex-column justify-content-between align-items-center row-gap-1 control-interface-wrapper"
     >
-      <BetSizeSelector
-        isIdentified={isIdentified}
-        betSizeControl={[bidAmount, setBidAmount]}
-        callToaster={callToaster}
-      />
+      <div className="control-interface">
+        <BetSizeSelector
+          isIdentified={isIdentified}
+          betSizeControl={[bidAmount, setBidAmount]}
+          callToaster={callToaster}
+        />
 
-      <Container style={buttonsContainerStyle}>
-        <Row>
-          <Col style={{ padding: "5px 5px" }} xs={6} md={6}>
-            <SelectButton
-              text={"HEADS"}
-              onClick={() => handleChooseSide("heads")}
-              type={"select-side"}
-            />
-          </Col>
+        <Container style={buttonsContainerStyle}>
+          <Row>
+            <Col style={{ padding: "5px 5px" }} xs={6} md={6}>
+              <SelectButton
+                text={"HEADS"}
+                onClick={() => handleChooseSide("heads")}
+                type={"select-side"}
+              />
+            </Col>
 
-          <Col style={{ padding: "5px 5px" }} xs={6} md={6}>
-            <SelectButton
-              text={"TAILS"}
-              onClick={() => handleChooseSide("tails")}
-              type={"select-side"}
-            />
-          </Col>
-        </Row>
+            <Col style={{ padding: "5px 5px" }} xs={6} md={6}>
+              <SelectButton
+                text={"TAILS"}
+                onClick={() => handleChooseSide("tails")}
+                type={"select-side"}
+              />
+            </Col>
+          </Row>
 
-        <Row>
-          <Col style={{ padding: "5px 5px" }}>
-            <SelectButton
-              text={"FLIP"}
-              onClick={() => handleSubmitFlip()}
-              type={"submit-flip"}
-            />
-          </Col>
-        </Row>
-      </Container>
+          <Row>
+            <Col style={{ padding: "5px 5px" }}>
+              <SelectButton
+                text={"FLIP"}
+                onClick={() => handleSubmitFlip()}
+                type={"submit-flip"}
+              />
+            </Col>
+          </Row>
+        </Container>
+      </div>
     </Container>
   );
 }
