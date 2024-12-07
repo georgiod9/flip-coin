@@ -1,6 +1,8 @@
 import { Container } from "react-bootstrap";
 import coinIcon from "../../assets/svg/coin_hq.svg";
 import inputButton from "../../assets/svg/input-button-v2.svg";
+import { playSoundEffects } from "../../scripts/SoundEffects";
+
 import "./BetSizeSelector.css";
 
 function BetSizeSelector({
@@ -14,6 +16,8 @@ function BetSizeSelector({
   const bidAmounts = [0.1, 0.5, 1, 2];
 
   const handleChooseBetSize = (amount) => {
+    playSoundEffects.click();
+
     if (!isIdentified) {
       callToaster(false, `Failed`, `Please connect your wallet`, "", 2000);
       return;

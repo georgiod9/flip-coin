@@ -6,6 +6,7 @@ import SelectButton from "../Select-button/SelectButton";
 import BetSizeSelector from "../BetSizeSelector/BetSizeSelector";
 import "./ControlInterface.css";
 import { AuthClient } from "@dfinity/auth-client";
+import { playSoundEffects } from "../../scripts/SoundEffects";
 
 function ControlInterface({
   isIdentified,
@@ -32,6 +33,8 @@ function ControlInterface({
   });
 
   const handleChooseSide = (side) => {
+    playSoundEffects.click();
+
     if (!isIdentified) {
       callToaster(false, `Failed`, `Please connect your wallet`, "", 2000);
       return;
@@ -53,6 +56,8 @@ function ControlInterface({
   };
 
   const handleSubmitFlip = async () => {
+    playSoundEffects.click();
+
     const authClient = await AuthClient.create();
     const id = authClient.getIdentity();
     console.log(`Using identity:`, id.getPrincipal().toString());
@@ -86,6 +91,12 @@ function ControlInterface({
 
     setHasPending((prev) => prev.filter((item) => item !== "submitFlip"));
     toggleRefresh();
+
+    if (result.includes("Congratulations")) {
+      playSoundEffects.betWin();
+    } else {
+      playSoundEffects.betLose();
+    }
 
     // TODO: Calculate reward based on actual multiplier from canister
     callToaster(

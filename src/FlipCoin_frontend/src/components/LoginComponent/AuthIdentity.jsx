@@ -196,6 +196,8 @@ function AuthIdentity({
     if (!response?.success) {
       callToaster(false, `Deposit Failed`, response.error, "", 1500);
     } else {
+      playSoundEffects.transfer();
+
       callToaster(
         true,
         `Deposit Success`,
@@ -226,6 +228,8 @@ function AuthIdentity({
     if (!response?.success) {
       callToaster(false, `Withdrawal Failed`, "", response.error, 1500);
     } else {
+      playSoundEffects.transfer();
+
       callToaster(
         true,
         `Withdrawal Success`,

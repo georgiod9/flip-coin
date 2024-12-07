@@ -49,10 +49,6 @@ function Header({
   });
 
   useEffect(() => {
-    // console.log(`Account balance changed.`, accountBalance);
-  }, [accountBalance]);
-
-  useEffect(() => {
     const fromBackendFetch_RecentFlips = async () => {
       if (FlipCoin_backend) {
         setHasPending((prev) => [...prev, "getRecentFlips"]);

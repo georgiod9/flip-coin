@@ -5,6 +5,7 @@ import { _SERVICE as IcpLedgerService } from "../../../../declarations/icp_ledge
 import { e8sToIcp } from "../../scripts/e8s";
 import { validatePrincipal } from "../../scripts/getPrincipal";
 import { transferICP } from "../../scripts/icpLedger";
+import { playSoundEffects } from "../../scripts/SoundEffects";
 
 interface TransferModalProps {
   show: boolean;
@@ -121,6 +122,8 @@ export function TransferModal({
       );
 
       if (result.success) {
+        playSoundEffects.transfer();
+
         callToaster(true, "Cashout Success", "Cashout successful.", "", 1500);
         toggleRefresh();
         onHide();
