@@ -24,6 +24,8 @@ function ControlInterface({
   const [bidAmount, setBidAmount] = useState(0);
   const [hasPending, setHasPending] = hasPendingControl;
 
+  const [isFlipping, setIsFlipping] = useState(false);
+
   const [stats, setStats] = useState({
     initialized: false,
     tailsRate: null,
@@ -56,6 +58,7 @@ function ControlInterface({
   };
 
   const handleSubmitFlip = async () => {
+    setIsFlipping(true);
     playSoundEffects.click();
 
     const authClient = await AuthClient.create();
@@ -87,6 +90,8 @@ function ControlInterface({
 
     const bidSide = selectedSide === 1 ? true : false;
     const result = await backendActor.submitFlip(bidSide, icpToE8s(bidAmount));
+    setIsFlipping(false);
+
     console.log(`result: `, result);
 
     setHasPending((prev) => prev.filter((item) => item !== "submitFlip"));
@@ -123,6 +128,7 @@ function ControlInterface({
           isIdentified={isIdentified}
           betSizeControl={[bidAmount, setBidAmount]}
           callToaster={callToaster}
+          isLoading={isFlipping}
         />
 
         <div className="buttons-container">

@@ -239,3 +239,66 @@
     top: 35%;
   }
 }
+
+/* Pulsing glow animation */
+@keyframes pulseGlow {
+  0% {
+    transform: translateY(-50%) scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateY(-50%) scale(1.5);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-50%) scale(1);
+    opacity: 0.5;
+  }
+}
+
+.coin-icon-glow.active {
+  animation: pulseGlow 1s ease-in-out infinite;
+  background: radial-gradient(
+    circle,
+    rgba(0, 246, 255, 0.6) 0%,
+    rgba(0, 181, 255, 0) 70%
+  );
+}
+
+/* Glow effect container */
+.coin-icon-glow {
+  position: absolute;
+  left: 38%;
+  top: 40%;
+  transform: translate(-50%, -50%);
+
+  width: 200px;
+  height: 200px;
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+  .coin-icon-glow {
+    position: absolute;
+    left: 35%;
+    top: 40%;
+    transform: translate(-50%, -50%);
+
+    width: 150px;
+    height: 150px;
+    z-index: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .coin-icon-glow {
+    position: absolute;
+    left: 35%;
+    top: 35%;
+    transform: translate(-50%, -50%);
+
+    width: 100px;
+    height: 100px;
+    z-index: 1;
+  }
+}

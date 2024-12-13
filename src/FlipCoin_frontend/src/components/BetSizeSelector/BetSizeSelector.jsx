@@ -11,6 +11,7 @@ function BetSizeSelector({
   betSizeControl,
   callToaster,
   isIdentified,
+  isLoading,
 }) {
   const [bidAmount, setBidAmount] = betSizeControl;
   const bidAmounts = [0.1, 0.5, 1, 2];
@@ -31,6 +32,7 @@ function BetSizeSelector({
       <div className="bet-interface-wrapper">
         <div className="bet-interface">
           <img className="coin-icon" src={coinIcon} alt="Coin" />
+          <div className={`coin-icon-glow ${isLoading ? "active" : ""}`}></div>
 
           <p className="main-text">{text}</p>
 
