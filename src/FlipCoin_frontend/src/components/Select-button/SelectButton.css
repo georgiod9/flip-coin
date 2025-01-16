@@ -96,3 +96,16 @@
     font-size: clamp(12px, 1.1vw, 18px);
   }
 }
+
+.select-button-token-icon {
+  width: 30px;
+  height: auto;
+}
+
+.select-button-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 10px;
+}
