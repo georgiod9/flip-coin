@@ -1,10 +1,20 @@
 import { Container } from "react-bootstrap";
+import headsTokenImg from "../../assets/svg/Heads_Token.svg";
+import tailsTokenImg from "../../assets/svg/Tails_Token.svg";
 
 import "./SelectButton.css";
 function SelectButton({ text, onClick, type }) {
   return (
     <div className={`select-button ${type}`} onClick={onClick}>
-      <p className="select-button-text">{text}</p>
+      <div className="select-button-content">
+        {type === "select-side" && (
+          <img
+            className="select-button-token-icon"
+            src={text === "HEADS" ? headsTokenImg : tailsTokenImg}
+          ></img>
+        )}
+        <p className="select-button-text">{text}</p>
+      </div>
     </div>
   );
 }

@@ -30,7 +30,7 @@ function App() {
   const [accountCredit, setAccountCredit] = useState(null);
   const [isIdentified, setIsIdentified] = useState(false);
 
-  const [flipCoinCanisterBalance, setFlipCoinCanisterBalance] = useState(0);
+  const [flipCoinCanisterBalance, setFlipCoinCanisterBalance] = useState(null);
   const [ledgerCanisterPrincipal, setLedgerCanisterPrincipal] = useState(null);
 
   //Toast vars

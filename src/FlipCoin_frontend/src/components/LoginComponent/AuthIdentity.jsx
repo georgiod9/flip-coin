@@ -18,6 +18,7 @@ import { WalletComponent } from "../WalletComponent/WalletComponent";
 import { TransferModal } from "../TransferModal/TransferModal";
 import { transferTokens } from "../../scripts/topUp";
 import { withdrawRewards } from "../../scripts/RewardWithdrawal";
+import { playSoundEffects } from "../../scripts/SoundEffects";
 
 let actor = FlipCoin_backend;
 
@@ -196,6 +197,8 @@ function AuthIdentity({
     if (!response?.success) {
       callToaster(false, `Deposit Failed`, response.error, "", 1500);
     } else {
+      playSoundEffects.transfer();
+
       callToaster(
         true,
         `Deposit Success`,
@@ -226,6 +229,8 @@ function AuthIdentity({
     if (!response?.success) {
       callToaster(false, `Withdrawal Failed`, "", response.error, 1500);
     } else {
+      playSoundEffects.transfer();
+
       callToaster(
         true,
         `Withdrawal Success`,

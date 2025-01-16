@@ -6,6 +6,7 @@ import SelectButton from "../Select-button/SelectButton";
 import BetSizeSelector from "../BetSizeSelector/BetSizeSelector";
 import "./ControlInterface.css";
 import { AuthClient } from "@dfinity/auth-client";
+import { playSoundEffects } from "../../scripts/SoundEffects";
 
 function ControlInterface({
   isIdentified,
@@ -23,6 +24,8 @@ function ControlInterface({
   const [bidAmount, setBidAmount] = useState(0);
   const [hasPending, setHasPending] = hasPendingControl;
 
+  const [isFlipping, setIsFlipping] = useState(false);
+
   const [stats, setStats] = useState({
     initialized: false,
     tailsRate: null,
@@ -32,6 +35,8 @@ function ControlInterface({
   });
 
   const handleChooseSide = (side) => {
+    playSoundEffects.click();
+
     if (!isIdentified) {
       callToaster(false, `Failed`, `Please connect your wallet`, "", 2000);
       return;
@@ -53,6 +58,8 @@ function ControlInterface({
   };
 
   const handleSubmitFlip = async () => {
+    playSoundEffects.click();
+
     const authClient = await AuthClient.create();
     const id = authClient.getIdentity();
     console.log(`Using identity:`, id.getPrincipal().toString());
@@ -68,24 +75,34 @@ function ControlInterface({
     }
     if (selectedSide === -1) {
       console.log(`Please select side.`);
+      callToaster(false, `Failed`, `Please select side.`, "", 2000);
       return;
     }
 
     if (bidAmount === 0) {
-      console.log(`Please select bet size`);
+      callToaster(false, `Failed`, `Please select bet size`, "", 2000);
       return;
     }
 
     setHasPending((prev) => [...prev, "submitFlip"]);
 
     callToaster(true, `Flipping coin`, `Please wait for result.`, "", 2500);
+    setIsFlipping(true);
 
     const bidSide = selectedSide === 1 ? true : false;
     const result = await backendActor.submitFlip(bidSide, icpToE8s(bidAmount));
+    setIsFlipping(false);
+
     console.log(`result: `, result);
 
     setHasPending((prev) => prev.filter((item) => item !== "submitFlip"));
     toggleRefresh();
+
+    if (result.includes("Congratulations")) {
+      playSoundEffects.betWin();
+    } else {
+      playSoundEffects.betLose();
+    }
 
     // TODO: Calculate reward based on actual multiplier from canister
     callToaster(
@@ -112,6 +129,7 @@ function ControlInterface({
           isIdentified={isIdentified}
           betSizeControl={[bidAmount, setBidAmount]}
           callToaster={callToaster}
+          isLoading={isFlipping}
         />
 
         <div className="buttons-container">

@@ -1,6 +1,8 @@
 import { Container } from "react-bootstrap";
 import coinIcon from "../../assets/svg/coin_hq.svg";
 import inputButton from "../../assets/svg/input-button-v2.svg";
+import { playSoundEffects } from "../../scripts/SoundEffects";
+
 import "./BetSizeSelector.css";
 
 function BetSizeSelector({
@@ -9,11 +11,14 @@ function BetSizeSelector({
   betSizeControl,
   callToaster,
   isIdentified,
+  isLoading,
 }) {
   const [bidAmount, setBidAmount] = betSizeControl;
   const bidAmounts = [0.1, 0.5, 1, 2];
 
   const handleChooseBetSize = (amount) => {
+    playSoundEffects.click();
+
     if (!isIdentified) {
       callToaster(false, `Failed`, `Please connect your wallet`, "", 2000);
       return;
@@ -27,6 +32,7 @@ function BetSizeSelector({
       <div className="bet-interface-wrapper">
         <div className="bet-interface">
           <img className="coin-icon" src={coinIcon} alt="Coin" />
+          <div className={`coin-icon-glow ${isLoading ? "active" : ""}`}></div>
 
           <p className="main-text">{text}</p>
 
