@@ -4,15 +4,13 @@ import "./WalletComponent.css";
 interface WalletComponentProps {
   isModalOpen: boolean;
   children: React.ReactNode;
-  hasPending: string[];
-  isLoading?: boolean;
+  hasPending: boolean;
 }
 
 export const WalletComponent = ({
   isModalOpen,
   children,
   hasPending,
-  isLoading = false,
 }: WalletComponentProps) => {
   return (
     <div className="wallet-button-wrapper">
@@ -20,9 +18,7 @@ export const WalletComponent = ({
         <div className="wallet-button-inner">
           <div className="wallet-icon"></div>
           <div
-            className={`wallet-icon-glow ${
-              hasPending?.length > 0 ? "active" : ""
-            }`}
+            className={`wallet-icon-glow ${hasPending ? "active" : ""}`}
           ></div>
           {children}
         </div>

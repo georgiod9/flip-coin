@@ -1,10 +1,23 @@
 import { useEffect, useState } from "react";
 import { Toast } from "react-bootstrap";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import IconTextRowView from "../IconTextRowView/IconTextRowView";
+// import IconTextRowView from "../IconTextRowView/IconTextRowView";
 import InfoIcon from "@mui/icons-material/Info";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import "./Toaster.css";
+import IconTextRowView from "../IconTextRowView/IconTextRowView";
+
+interface ToasterProps {
+  headerContent: string;
+  toastStatus: boolean;
+  toastData: string;
+  textColor?: string;
+  show: boolean;
+  onHide: () => void;
+  timeout: number;
+  link: string;
+  overrideTextStyle?: string;
+}
 
 export default function Toaster({
   headerContent,
@@ -16,7 +29,7 @@ export default function Toaster({
   timeout,
   link,
   overrideTextStyle,
-}) {
+}: ToasterProps) {
   const header = headerContent;
   const backgroundColor = "#260B50";
 

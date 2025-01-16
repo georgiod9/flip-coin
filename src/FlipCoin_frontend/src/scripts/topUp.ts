@@ -1,6 +1,9 @@
+import { Identity } from "@dfinity/agent";
+import LedgerApi from "../api/LedgerApi/LedgerApi";
 import { e8sToIcp, icpToE8s } from "./e8s";
 import { retrieveTransferFee } from "./fee";
 import { getUserDepositAddress } from "./getPrincipal";
+import BackendApi from "../api/BackendCanister/BackendCanister";
 
 interface DepositReceipt {
   success: boolean;
@@ -8,27 +11,33 @@ interface DepositReceipt {
   error?: string;
 }
 
-export const depositTokens = async (identifiedActor: any): Promise<{
+export const depositTokens = async (identity: Identity): Promise<{
   success: boolean,
   amount?: bigint,
   error?: string
 }> => {
   try {
-    const deposit = await identifiedActor.depositIcp();
-    if ('Ok' in deposit) {
+    const backendApi = await BackendApi.create(identity);
+    if (!backendApi) {
+      throw new Error("Backend API not found");
+    }
+
+    const deposit = await backendApi.depositIcp();
+    // const deposit = await ledgerApi.depositIcp();
+    if (deposit.success) {
       return {
         success: true,
-        amount: deposit.Ok
+        amount: deposit.amount
       }
     }
-    if ('Err' in deposit) {
-      if ('BalanceLow' in deposit.Err) {
+    else {
+      if ('BalanceLow' in deposit.error) {
         return {
           success: false,
           error: 'Insufficient balance in deposit account. Please transfer ICP first'
         }
       }
-      if ('TransferFailure' in deposit.Err) {
+      if ('TransferFailure' in deposit.error) {
         return {
           success: false,
           error: 'Failed to transfer ICP. Please try again or contact support.'
@@ -47,7 +56,7 @@ export const depositTokens = async (identifiedActor: any): Promise<{
   }
 }
 
-export const transferTokens = async (amount: number, identifiedActor: any, identifiedIcpActor: any): Promise<DepositReceipt> => {
+export const transferTokens = async (amount: number, identifiedActor: any, identifiedIcpActor: any, identity: Identity): Promise<DepositReceipt> => {
   const amountInE8s = icpToE8s(
     parseFloat((amount + e8sToIcp(retrieveTransferFee())).toString())
   );
@@ -69,11 +78,17 @@ export const transferTokens = async (amount: number, identifiedActor: any, ident
     };
     console.log(`transferArgs`, transferArgs);
 
-    const result = await identifiedIcpActor.transfer(transferArgs);
-    console.log("Transfer token result:", result);
-    console.log("Transfer token result.ok:", result.Ok);
+    const ledgerApi = await LedgerApi.create(identity);
+    if (!ledgerApi) {
+      throw new Error("Ledger API not found");
+    }
 
-    return await depositTokens(identifiedActor);
+    const result = await ledgerApi.transfer(userDepositAddress, amount);
+
+    // const result = await identifiedIcpActor.transfer(transferArgs);
+    console.log("Transfer token result:", result);
+
+    return await depositTokens(identity);
 
   } catch (error) {
     console.error("Error during transfer:", error);

@@ -6,12 +6,14 @@ import { e8sToIcp } from "../../scripts/e8s";
 import { validatePrincipal } from "../../scripts/getPrincipal";
 import { transferICP } from "../../scripts/icpLedger";
 import { playSoundEffects } from "../../scripts/SoundEffects";
+import { useLedger } from "../../context/LedgerContext/LedgerContext";
+import { useStateProvider } from "../../context/StateContext/StateContext";
+import { useAccount } from "../../context/AccountContext/AccountContext";
 
 interface TransferModalProps {
   show: boolean;
-  myPrincipal: string;
+  myPrincipal?: string;
   onHide: () => void;
-  identifiedIcpLedgerActor: IcpLedgerService | null;
   balance: number | null;
   callToaster: (
     status: boolean,
@@ -21,23 +23,25 @@ interface TransferModalProps {
     timeout: number
   ) => void;
   toggleRefresh: () => void;
-  hasPendingControl: [string[], React.Dispatch<React.SetStateAction<string[]>>];
 }
 
 export function TransferModal({
   show,
   myPrincipal,
   onHide,
-  identifiedIcpLedgerActor,
   balance,
   callToaster,
   toggleRefresh,
-  hasPendingControl,
 }: TransferModalProps) {
+  /** Hooks */
+  const { ledgerActor, transfer } = useLedger();
+  const { addPendingTask, removePendingTask } = useStateProvider();
+  const { refreshAll } = useAccount();
+
   const [destinationPrincipal, setDestinationPrincipal] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
-  const [hasPending, setHasPending] = hasPendingControl;
 
+  /* Functions */
   const handleModalClick = (e: MouseEvent): void => {
     e.preventDefault();
     e.stopPropagation();
@@ -111,15 +115,12 @@ export function TransferModal({
         );
         return;
       }
-      setHasPending((prev) => [...prev, "cashout"]);
+
+      addPendingTask("cashout");
 
       callToaster(true, "Cashing Out", "Transaction sent!", "", 1500);
 
-      const result = await transferICP(
-        parseFloat(amount),
-        destinationPrincipal,
-        identifiedIcpLedgerActor
-      );
+      const result = await transfer(parseFloat(amount), destinationPrincipal);
 
       if (result.success) {
         playSoundEffects.transfer();
@@ -140,7 +141,6 @@ export function TransferModal({
           );
         }
       }
-      setHasPending((prev) => prev.filter((item) => item !== "cashout"));
     } catch (error) {
       console.error(`Error cashing out`, error);
       callToaster(
@@ -150,7 +150,9 @@ export function TransferModal({
         "",
         1500
       );
-      setHasPending((prev) => prev.filter((item) => item !== "cashout"));
+    } finally {
+      removePendingTask("cashout");
+      refreshAll();
     }
   };
 

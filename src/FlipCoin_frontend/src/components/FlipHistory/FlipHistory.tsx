@@ -3,13 +3,14 @@ import headsTokenImg from "../../assets/svg/Heads_Token.svg";
 import tailsTokenImg from "../../assets/svg/Tails_Token.svg";
 import "./FlipHistory.css";
 
-interface FlipHistory {
+export interface FlipHistory {
   entropyBlob: number[];
   result: boolean;
   timestamp: number;
 }
 
-interface Statistics {
+export interface FlipStatistics {
+  initialized: boolean;
   headsCount: number;
   headsRate: number;
   tailsCount: number;
@@ -21,13 +22,13 @@ export const FlipHistory = ({
   statistics,
 }: {
   flipHistory: FlipHistory[];
-  statistics: Statistics;
+  statistics: FlipStatistics;
 }) => {
   return (
     <div className="flip-history-container">
       <div className="coins-wrapper">
         <div className="coins-container">
-          {flipHistory ? (
+          {flipHistory && flipHistory.length > 0 ? (
             flipHistory.map((flip: FlipHistory, index: number) => (
               <div key={index}>
                 <img

@@ -194,6 +194,7 @@
   font-size: 0.5rem;
   border-width: 0.15rem;
   margin: 0 auto;
+  margin-top: 2px;
 }
 
 .wallet-spinner {

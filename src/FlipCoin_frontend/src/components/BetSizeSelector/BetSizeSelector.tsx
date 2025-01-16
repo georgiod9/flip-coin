@@ -5,18 +5,31 @@ import { playSoundEffects } from "../../scripts/SoundEffects";
 
 import "./BetSizeSelector.css";
 
+interface BetSizeSelectorProps {
+  // text?: string;
+  // onClick: () => void;
+  betSizeControl: [number, (amount: number) => void];
+  callToaster: (
+    success: boolean,
+    title: string,
+    message: string,
+    icon: string,
+    duration: number
+  ) => void;
+  isIdentified: boolean;
+  isLoading: boolean;
+}
+
 function BetSizeSelector({
-  text,
-  onClick,
   betSizeControl,
   callToaster,
   isIdentified,
   isLoading,
-}) {
+}: BetSizeSelectorProps) {
   const [bidAmount, setBidAmount] = betSizeControl;
   const bidAmounts = [0.1, 0.5, 1, 2];
 
-  const handleChooseBetSize = (amount) => {
+  const handleChooseBetSize = (amount: number) => {
     playSoundEffects.click();
 
     if (!isIdentified) {
@@ -28,13 +41,13 @@ function BetSizeSelector({
   };
 
   return (
-    <Container className="bet-size-container" onClick={onClick}>
+    <Container className="bet-size-container">
       <div className="bet-interface-wrapper">
         <div className="bet-interface">
           <img className="coin-icon" src={coinIcon} alt="Coin" />
           <div className={`coin-icon-glow ${isLoading ? "active" : ""}`}></div>
 
-          <p className="main-text">{text}</p>
+          {/* <p className="main-text">{text}</p> */}
 
           <div className="bid-buttons-container">
             {bidAmounts.map((amount, index) => (

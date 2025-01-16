@@ -1,10 +1,10 @@
 import { Principal } from "@dfinity/principal";
-import { icp_ledger_canister } from "declarations/icp_ledger_canister";
-import { FlipCoin_backend, createActor } from "declarations/FlipCoin_backend";
+import { icp_ledger_canister } from "../../../declarations/icp_ledger_canister";
+import { FlipCoin_backend, createActor } from "../../../declarations/FlipCoin_backend";
 import { e8sToIcp } from "./e8s";
 // Define the Account structure based on the candid definition
 
-export const getWalletOnChainBalance = async (principal) => {
+export const getWalletOnChainBalance = async (principal: Principal) => {
     try {
         const accountIdentifier = {
             owner: principal,
@@ -21,7 +21,7 @@ export const getWalletOnChainBalance = async (principal) => {
     }
 };
 
-export const getCanisterIcpBalance = async (principal) => {
+export const getCanisterIcpBalance = async (principal: string) => {
     try {
         const accountIdentifier = await icp_ledger_canister.account_identifier({ owner: Principal.fromText(principal), subaccount: [] })
         const balance = await icp_ledger_canister.account_balance({ account: accountIdentifier })
@@ -50,7 +50,7 @@ export const getFlipCoinCanisterBalance = async () => {
     }
 };
 
-export const getFlipCoinCredits = async (identifiedActor) => {
+export const getFlipCoinCredits = async (identifiedActor: any) => {
     try {
         const balanceFlipcoin = await identifiedActor.getCredits();
 

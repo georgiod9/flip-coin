@@ -1,3 +1,12 @@
+interface IconTextRowViewProps {
+  IconComponent: any;
+  text: string;
+  iconColor: string;
+  overrideContainerStyle?: any;
+  overrideTextStyle?: any;
+  clickHandler?: any;
+}
+
 function IconTextRowView({
   IconComponent,
   text,
@@ -5,7 +14,7 @@ function IconTextRowView({
   overrideContainerStyle = {},
   overrideTextStyle = {},
   clickHandler,
-}) {
+}: IconTextRowViewProps) {
   const textMutedStyle = {
     color: "grey",
     fontStyle: "italic",

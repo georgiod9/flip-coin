@@ -2,28 +2,38 @@ import { useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import "./flip.css";
 import { icpToE8s } from "../../scripts/e8s";
-import SelectButton from "../Select-button/SelectButton";
-import BetSizeSelector from "../BetSizeSelector/BetSizeSelector";
+// import SelectButton from "../Select-button/SelectButton";
+// import BetSizeSelector from "../BetSizeSelector/BetSizeSelector";
 import "./ControlInterface.css";
 import { AuthClient } from "@dfinity/auth-client";
 import { playSoundEffects } from "../../scripts/SoundEffects";
+import { useIdentity } from "../../context/IdentityContext/IdentityContext";
+import BackendApi from "../../api/BackendCanister/BackendCanister";
+import { useStateProvider } from "../../context/StateContext/StateContext";
+import { useBackend } from "../../context/BackendContext/BackendContext";
+import BetSizeSelector from "../BetSizeSelector/BetSizeSelector";
+import SelectButton from "../Select-button/SelectButton";
+import { useAccount } from "../../context/AccountContext/AccountContext";
 
+interface ControlInterfaceProps {
+  backendActor: any;
+  callToaster: any;
+  toggleRefresh: any;
+}
 function ControlInterface({
-  isIdentified,
   backendActor,
   callToaster,
   toggleRefresh,
-  refreshControl,
-  identifiedActor,
-  identifiedIcpActor,
-  hasPendingControl,
-}) {
-  const [lastFlipId, setLastFlipId] = useState(0);
-  const [flipHistory, setFlipHistory] = useState([]);
+}: ControlInterfaceProps) {
+  /** Hooks */
+  const { isConnected, identity } = useIdentity();
+  const { addPendingTask, removePendingTask } = useStateProvider();
+  const { refreshAllBalances } = useBackend();
+  const { refreshCreditBalance } = useAccount();
+
+  /** States */
   const [selectedSide, setSelectedSide] = useState(-1); // -1 unselected, 0 tails, 1 heads
   const [bidAmount, setBidAmount] = useState(0);
-  const [hasPending, setHasPending] = hasPendingControl;
-
   const [isFlipping, setIsFlipping] = useState(false);
 
   const [stats, setStats] = useState({
@@ -34,10 +44,10 @@ function ControlInterface({
     headsCount: null,
   });
 
-  const handleChooseSide = (side) => {
+  const handleChooseSide = (side: string) => {
     playSoundEffects.click();
 
-    if (!isIdentified) {
+    if (!isConnected) {
       callToaster(false, `Failed`, `Please connect your wallet`, "", 2000);
       return;
     }
@@ -63,7 +73,7 @@ function ControlInterface({
     const authClient = await AuthClient.create();
     const id = authClient.getIdentity();
     console.log(`Using identity:`, id.getPrincipal().toString());
-    if (!isIdentified) {
+    if (!isConnected) {
       callToaster(false, `Failed`, `Please connect your wallet`, "", 2000);
       return;
     }
@@ -84,39 +94,52 @@ function ControlInterface({
       return;
     }
 
-    setHasPending((prev) => [...prev, "submitFlip"]);
+    try {
+      addPendingTask("submitFlip");
+      callToaster(true, `Flipping coin`, `Please wait for result.`, "", 2500);
+      setIsFlipping(true);
 
-    callToaster(true, `Flipping coin`, `Please wait for result.`, "", 2500);
-    setIsFlipping(true);
+      const bidSide = selectedSide === 1 ? true : false;
+      const backendApi = await BackendApi.create(identity);
+      if (!backendApi) {
+        callToaster(false, `Failed`, `Failed to create backend API.`, "", 2000);
+        return;
+      }
 
-    const bidSide = selectedSide === 1 ? true : false;
-    const result = await backendActor.submitFlip(bidSide, icpToE8s(bidAmount));
-    setIsFlipping(false);
+      const result = await backendApi.submitFlip(bidSide, bidAmount);
+      setIsFlipping(false);
 
-    console.log(`result: `, result);
+      console.log(`Flipped: `, result);
+      toggleRefresh();
 
-    setHasPending((prev) => prev.filter((item) => item !== "submitFlip"));
-    toggleRefresh();
+      if (result.includes("Congratulations")) {
+        playSoundEffects.betWin();
+      } else {
+        playSoundEffects.betLose();
+      }
 
-    if (result.includes("Congratulations")) {
-      playSoundEffects.betWin();
-    } else {
-      playSoundEffects.betLose();
+      // TODO: Calculate reward based on actual multiplier from canister
+      callToaster(
+        result.includes("Congratulations") ? true : false,
+        result.includes("Congratulations")
+          ? `You won ${bidAmount * 1.95} ICP`
+          : `You lost.`,
+        `${result}`,
+        "",
+        6000
+      );
+
+      setBidAmount(0);
+      setSelectedSide(-1);
+    } catch (error) {
+      console.log(`Error submitting flip: `, error);
+      callToaster(false, `Failed`, `Failed to submit flip.`, "", 2000);
+    } finally {
+      removePendingTask("submitFlip");
+      console.log(`Refreshing balances...`);
+      refreshAllBalances();
+      refreshCreditBalance();
     }
-
-    // TODO: Calculate reward based on actual multiplier from canister
-    callToaster(
-      result.includes("Congratulations") ? true : false,
-      result.includes("Congratulations")
-        ? `You won ${bidAmount * 1.95} ICP`
-        : `You lost.`,
-      `${result}`,
-      "",
-      6000
-    );
-
-    setBidAmount(0);
-    setSelectedSide(-1);
   };
 
   return (
@@ -126,7 +149,7 @@ function ControlInterface({
     >
       <div className="control-interface">
         <BetSizeSelector
-          isIdentified={isIdentified}
+          isIdentified={isConnected}
           betSizeControl={[bidAmount, setBidAmount]}
           callToaster={callToaster}
           isLoading={isFlipping}
