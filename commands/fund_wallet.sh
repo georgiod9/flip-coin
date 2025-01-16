@@ -32,7 +32,7 @@ echo ">Balance: $ICP_BALANCE ICP"
 # Get receiver ID and ID in bytes
 echo ""
 echo "===========RECEIVER==========="
-RECEIVER_PRINCIPAL="psrqi-nudq4-hn3s4-am6ql-ptr7k-raoge-ttc3f-o2fe2-b3ybt-f5bjx-wqe"
+RECEIVER_PRINCIPAL="oogkj-c7dvu-nalcu-pxanx-b4fqj-m77x7-h5uvd-2vzwm-lye3x-saugg-mqe"
 RECEIVER_ID=$(dfx ledger account-id --of-principal $RECEIVER_PRINCIPAL)
 RECEIVER_ID_IN_BYTES="$(python3 -c 'print("vec{" + ";".join([str(b) for b in bytes.fromhex("'$RECEIVER_ID'")]) + "}")')"
 
@@ -50,7 +50,7 @@ echo ">Balance: $RECEIVER_BALANCE_BEFORE ICP"
 # Deposit 1 ICP from default identity to receiver principal using the ledger canister
 echo ""
 echo "===========DEPOSITING==========="
-DEPOSIT_AMOUNT_ICP=11
+DEPOSIT_AMOUNT_ICP=20
 DEPOSIT_AMOUNT_E8S=$(echo "$DEPOSIT_AMOUNT_ICP * 10^8" | bc)
 dfx canister --identity default call icp_ledger_canister transfer "(record { to = ${RECEIVER_ID_IN_BYTES}; memo = 1; amount = record { e8s = $DEPOSIT_AMOUNT_E8S }; fee = record { e8s = 10_000 }; })"
 

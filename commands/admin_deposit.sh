@@ -53,17 +53,11 @@ echo ">Credit: $ICP_CANISTER_CREDIT_BEFORE ICP"
 # Deposit 1 ICP from default identity to FlipCoin canister using the ledger canister
 echo ""
 echo "===========DEPOSITING==========="
-DEPOSIT_AMOUNT_ICP=1
+DEPOSIT_AMOUNT_ICP=1000
 DEPOSIT_AMOUNT_E8S=$(echo "$DEPOSIT_AMOUNT_ICP * 10^8" | bc)
 dfx canister --identity default call icp_ledger_canister transfer "(record { to = ${CANISTER_ID_IN_BYTES}; memo = 1; amount = record { e8s = $DEPOSIT_AMOUNT_E8S }; fee = record { e8s = 10_000 }; })"
 
-# Get FlipCoin canister balance after the admin deposit
-echo ""
-echo "===========CANISTER BALANCE AFTER==========="
-CANISTER_BALANCE_AFTER=$(dfx canister call icp_ledger_canister account_balance '(record { account = '$(python3 -c 'print("vec{" + ";".join([str(b) for b in bytes.fromhex("'$CANISTER_ID'")]) + "}")')'})'| grep -o "e8s = [0-9_]*" | sed 's/e8s = //; s/_//g')
-ICP_CANISTER_BALANCE_AFTER=$(echo "scale=4; $CANISTER_BALANCE_AFTER / 10^8" | bc)
-CANISTER_CREDIT_AFTER=$(dfx canister call FlipCoin_backend getHouseBalance | grep -o "[0-9_]*" | sed 's/_//g')
-ICP_CANISTER_CREDIT_AFTER=$(echo "scale=4; $CANISTER_CREDIT_AFTER / 10^8" | bc)
+
 
 echo ">Balance: $ICP_CANISTER_BALANCE_AFTER ICP"
 echo ">Credit: $ICP_CANISTER_CREDIT_AFTER ICP"
@@ -73,3 +67,11 @@ echo ""
 echo "===========REBALANCE BOOK==========="
 
 dfx canister --identity default call FlipCoin_backend rebalanceBook
+
+# Get FlipCoin canister balance after the admin deposit
+echo ""
+echo "===========CANISTER BALANCE AFTER==========="
+CANISTER_BALANCE_AFTER=$(dfx canister call icp_ledger_canister account_balance '(record { account = '$(python3 -c 'print("vec{" + ";".join([str(b) for b in bytes.fromhex("'$CANISTER_ID'")]) + "}")')'})'| grep -o "e8s = [0-9_]*" | sed 's/e8s = //; s/_//g')
+ICP_CANISTER_BALANCE_AFTER=$(echo "scale=4; $CANISTER_BALANCE_AFTER / 10^8" | bc)
+CANISTER_CREDIT_AFTER=$(dfx canister call FlipCoin_backend getHouseBalance | grep -o "[0-9_]*" | sed 's/_//g')
+ICP_CANISTER_CREDIT_AFTER=$(echo "scale=4; $CANISTER_CREDIT_AFTER / 10^8" | bc)
