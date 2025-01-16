@@ -58,7 +58,6 @@ function ControlInterface({
   };
 
   const handleSubmitFlip = async () => {
-    setIsFlipping(true);
     playSoundEffects.click();
 
     const authClient = await AuthClient.create();
@@ -76,17 +75,19 @@ function ControlInterface({
     }
     if (selectedSide === -1) {
       console.log(`Please select side.`);
+      callToaster(false, `Failed`, `Please select side.`, "", 2000);
       return;
     }
 
     if (bidAmount === 0) {
-      console.log(`Please select bet size`);
+      callToaster(false, `Failed`, `Please select bet size`, "", 2000);
       return;
     }
 
     setHasPending((prev) => [...prev, "submitFlip"]);
 
     callToaster(true, `Flipping coin`, `Please wait for result.`, "", 2500);
+    setIsFlipping(true);
 
     const bidSide = selectedSide === 1 ? true : false;
     const result = await backendActor.submitFlip(bidSide, icpToE8s(bidAmount));

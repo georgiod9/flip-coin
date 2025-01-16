@@ -27,7 +27,7 @@ export const FlipHistory = ({
     <div className="flip-history-container">
       <div className="coins-wrapper">
         <div className="coins-container">
-          {flipHistory && flipHistory.length > 0 ? (
+          {flipHistory ? (
             flipHistory.map((flip: FlipHistory, index: number) => (
               <div key={index}>
                 <img

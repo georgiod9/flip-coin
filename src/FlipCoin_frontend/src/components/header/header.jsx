@@ -33,6 +33,7 @@ function Header({
   toggleRefresh,
   hasPendingControl,
 }) {
+  const [isLoadingStatistics, setIsLoadingStatistics] = useState(false);
   const [isMobileWidth, setMobileWidth] = useState(false);
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
   const [refresh] = refreshControl;
@@ -77,12 +78,14 @@ function Header({
     const fromBackendFetch_Statistics = async () => {
       setHasPending((prev) => [...prev, "getStatistics"]);
 
+      setIsLoadingStatistics(true);
       FlipCoin_backend.getStatistics()
         .then((statistics) => {
           console.log(`Fetched statistics`, statistics);
           setStats({ initialized: true, ...statistics });
         })
         .finally(() => {
+          setIsLoadingStatistics(false);
           setHasPending((prev) =>
             prev.filter((item) => item !== "getStatistics")
           );
@@ -107,7 +110,7 @@ function Header({
               <p>House</p>
             </div>
             <div className="house-funds-amount">
-              {flipCoinCanisterBalance ? (
+              {flipCoinCanisterBalance !== null ? (
                 <p>
                   {e8sToIcp(flipCoinCanisterBalance).toFixed(2).toString()} ICP
                 </p>
@@ -134,14 +137,14 @@ function Header({
             <>
               <p style={{ fontSize: "1rem", padding: "0" }}>
                 Heads:{" "}
-                {stats.headsRate ? (
-                  stats.headsRate?.toFixed(2).toString()
+                {!isLoadingStatistics ? (
+                  stats.headsRate?.toFixed(0).toString()
                 ) : (
                   <Spinner className="wallet-spinner-small" />
                 )}
                 {""}% Tails:{" "}
-                {stats.tailsRate ? (
-                  stats.tailsRate?.toFixed(2).toString()
+                {!isLoadingStatistics ? (
+                  stats.tailsRate?.toFixed(0).toString()
                 ) : (
                   <Spinner className="wallet-spinner-small" />
                 )}
