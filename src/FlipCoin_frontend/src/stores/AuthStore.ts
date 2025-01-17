@@ -27,8 +27,6 @@ class AuthStore {
         const identityKey: string | null = await storage.get('identity');
         const delegationChain: string | null = await storage.get('delegation');
 
-        console.log(`Identity key.....`, identityKey)
-        console.log(`delegationChain.....`, delegationChain)
 
         const chain: DelegationChain = DelegationChain.fromJSON(delegationChain!);
         const key: Ed25519KeyIdentity = Ed25519KeyIdentity.fromJSON(identityKey!);

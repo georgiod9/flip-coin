@@ -23,7 +23,6 @@ export class ICPLedger {
 
             // Call the icrc1_balance_of function with the account identifier
             const walletBalance = await this.actor.icrc1_balance_of(accountIdentifier);
-            console.log("Wallet Balance:", walletBalance);
             return walletBalance;
         } catch (error) {
             console.error(`getBalance: Error getting wallet balance.`, error);

@@ -53,10 +53,7 @@ export function IdentityProvider({ children }: IdentityProviderProps) {
       setIdentity(null);
       return identity;
     }
-    console.log(
-      `Identity already verified. :`,
-      identity.getPrincipal().toText()
-    );
+
     setIdentity(identity);
     setIsConnected(true);
     console.log(`Identity refreshed: `, identity.getPrincipal().toText());
@@ -108,10 +105,6 @@ export function IdentityProvider({ children }: IdentityProviderProps) {
       });
 
       const identity = authClient.getIdentity();
-      console.log(
-        `Logged in with principal:`,
-        identity.getPrincipal().toText()
-      );
 
       // Using the identity obtained from the auth client, create an agent to interact with the IC.
       const agent = await HttpAgent.create({

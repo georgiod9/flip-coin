@@ -1,9 +1,6 @@
 import { useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
+import { Container } from "react-bootstrap";
 import "./flip.css";
-import { icpToE8s } from "../../scripts/e8s";
-// import SelectButton from "../Select-button/SelectButton";
-// import BetSizeSelector from "../BetSizeSelector/BetSizeSelector";
 import "./ControlInterface.css";
 import { AuthClient } from "@dfinity/auth-client";
 import { playSoundEffects } from "../../scripts/SoundEffects";
@@ -72,7 +69,6 @@ function ControlInterface({
 
     const authClient = await AuthClient.create();
     const id = authClient.getIdentity();
-    console.log(`Using identity:`, id.getPrincipal().toString());
     if (!isConnected) {
       callToaster(false, `Failed`, `Please connect your wallet`, "", 2000);
       return;
@@ -80,7 +76,6 @@ function ControlInterface({
 
     // Validate backend service instance
     if (!backendActor) {
-      console.log(`Backend instance not defined.`);
       return;
     }
     if (selectedSide === -1) {

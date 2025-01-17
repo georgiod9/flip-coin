@@ -6,10 +6,6 @@ import {
   useState,
 } from "react";
 
-import {
-  FlipHistory,
-  FlipStatistics,
-} from "../../components/FlipHistory/FlipHistory";
 import BackendApi from "../../api/BackendCanister/BackendCanister";
 import { useIdentity } from "../IdentityContext/IdentityContext";
 import AccountApi from "../../api/AccountApi/AccountApi";
@@ -85,7 +81,6 @@ export function AccountProvider({ children }: AccountProviderProps) {
       );
 
       const balance = await ledgerApi.getBalance(identity.getPrincipal());
-      console.log(`Balance: `, balance);
       setOnChainBalance(balance);
       return balance;
     } catch (error) {

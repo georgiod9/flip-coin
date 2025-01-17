@@ -40,10 +40,7 @@ export const FlipHistory = ({
             ))
           ) : (
             <div className="spinner-container">
-              <Spinner
-                // style={{ width: "1rem", height: "1rem" }}
-                className="wallet-spinner"
-              />
+              <Spinner className="wallet-spinner" />
             </div>
           )}
         </div>

@@ -47,10 +47,8 @@ class BackendApi {
             });
             let isIdentified = false;
 
-            console.log(`Identity:`, identity);
             if (identity && identity.getPrincipal().toText() !== internetIdentityConfig.loggedOutPrincipal) {
                 isIdentified = true;
-                console.log(`Created new actor with identity:`, identity.getPrincipal().toText());
             }
             else {
                 isIdentified = false;
@@ -140,6 +138,9 @@ class BackendApi {
         try {
             if (!this.actor) {
                 throw new Error("Actor not initialized.");
+            }
+            if (!this.identity || this.identity.getPrincipal().toText() === internetIdentityConfig.loggedOutPrincipal) {
+                throw new Error("Identity not initialized.");
             }
             const deposit = await this.actor.depositIcp();
 

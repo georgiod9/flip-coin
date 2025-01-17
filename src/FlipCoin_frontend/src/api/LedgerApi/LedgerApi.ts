@@ -42,7 +42,6 @@ class LedgerApi {
             let isIdentified = false;
 
             if (identity && identity.getPrincipal().toText() !== internetIdentityConfig.loggedOutPrincipal) {
-                console.log(`Created actor with identity:`, identity.getPrincipal().toText());
                 isIdentified = true;
             }
 

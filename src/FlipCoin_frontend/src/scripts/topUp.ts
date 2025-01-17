@@ -61,12 +61,10 @@ export const transferTokens = async (amount: number, identifiedActor: any, ident
     parseFloat((amount + e8sToIcp(retrieveTransferFee())).toString())
   );
 
-  console.log(`Amount in e8s`, amountInE8s);
   try {
     // Retrieve deposit address
     const userDepositAddress = await getUserDepositAddress(identifiedActor);
 
-    console.log(`userDepositAddress`, userDepositAddress);
 
     const transferArgs = {
       to: userDepositAddress,
@@ -76,7 +74,6 @@ export const transferTokens = async (amount: number, identifiedActor: any, ident
       amount: { e8s: BigInt(Number(amountInE8s) + retrieveTransferFee()) },
       fee: { e8s: retrieveTransferFee() },
     };
-    console.log(`transferArgs`, transferArgs);
 
     const ledgerApi = await LedgerApi.create(identity);
     if (!ledgerApi) {
@@ -84,9 +81,6 @@ export const transferTokens = async (amount: number, identifiedActor: any, ident
     }
 
     const result = await ledgerApi.transfer(userDepositAddress, amount);
-
-    // const result = await identifiedIcpActor.transfer(transferArgs);
-    console.log("Transfer token result:", result);
 
     return await depositTokens(identity);
 

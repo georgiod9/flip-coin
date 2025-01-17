@@ -13,7 +13,6 @@ export const getWalletOnChainBalance = async (principal: Principal) => {
 
         // Call the icrc1_balance_of function with the account identifier
         const walletBalance = await icp_ledger_canister.icrc1_balance_of(accountIdentifier);
-        console.log("Wallet Balance:", walletBalance);
         return walletBalance;
     } catch (error) {
         console.error(`getBalance: Error getting wallet balance.`, error);
@@ -26,8 +25,6 @@ export const getCanisterIcpBalance = async (principal: string) => {
         const accountIdentifier = await icp_ledger_canister.account_identifier({ owner: Principal.fromText(principal), subaccount: [] })
         const balance = await icp_ledger_canister.account_balance({ account: accountIdentifier })
 
-
-        console.log("Canister Balance:", balance);
         return balance.e8s;
     } catch (error) {
         console.error(`getBalance: Error getting wallet balance.`, error);
@@ -39,10 +36,7 @@ export const getCanisterIcpBalance = async (principal: string) => {
 export const getFlipCoinCanisterBalance = async () => {
     try {
 
-        console.log(`Attempting to get house balance....`)
         const houseBalance = await FlipCoin_backend.getHouseBalance();
-        console.log(`House balance: `, e8sToIcp(houseBalance));
-
         return houseBalance;
     } catch (error) {
         console.error(`getBalance: Error getting flipcoin canister balance.`, error);

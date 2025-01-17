@@ -37,11 +37,7 @@ export function TopUpComponent({
       };
 
       const result = await identifiedIcpActor.transfer(transferArgs);
-      console.log("Transfer token result:", result);
-
       await triggerDepositTokens();
-      console.log(`Deposit complete.`);
-
       setShow(false);
 
       // Refresh components

@@ -6,8 +6,6 @@ import { playSoundEffects } from "../../scripts/SoundEffects";
 import "./BetSizeSelector.css";
 
 interface BetSizeSelectorProps {
-  // text?: string;
-  // onClick: () => void;
   betSizeControl: [number, (amount: number) => void];
   callToaster: (
     success: boolean,

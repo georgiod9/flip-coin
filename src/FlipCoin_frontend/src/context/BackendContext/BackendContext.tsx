@@ -63,7 +63,6 @@ export function BackendProvider({ children }: BackendProviderProps) {
       setFlipHistory(flipHistory.flipHistory);
       return flipHistory.flipHistory;
     } catch (error) {
-      console.log(`Error getting flip history: `, error);
       return [];
     } finally {
       setIsRefreshingFlipHistory(false);
